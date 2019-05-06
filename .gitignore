@@ -1,0 +1,10 @@
+*.csproj
+*.ide-wal
+*.ide-shm
+*.ide
+*.lock
+*.sln
+ppp/Library/
+ppp/obj/
+ppp/Temp/
+ppp/Assets/KUBIKOS - World/
