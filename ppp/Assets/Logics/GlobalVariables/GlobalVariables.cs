@@ -10,4 +10,10 @@ namespace GlobalVariables
         START_POINT,
         FINISH_POINT
     }
+
+    public enum CameraMode
+    {
+        FOLLOW,
+        ENTIRE_VIEW
+    }
 }
