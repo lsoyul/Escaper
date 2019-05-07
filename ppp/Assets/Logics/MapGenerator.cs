@@ -211,7 +211,10 @@ public class MapGenerator : MonoBehaviour
 
     public Coord positionToCoord(Vector3 pos)
     {
-        return new Coord();
+        int x = (int)((pos.x + currentMap.mapSize.x / 2f * tileSize) / tileSize);
+        int z = (int)((pos.z + currentMap.mapSize.y / 2f * tileSize) / tileSize);
+
+        return new Coord(x, z);
     }
 
     public Coord GetRandomCoord()
@@ -224,6 +227,14 @@ public class MapGenerator : MonoBehaviour
     public Map GetCurrentMap()
     {
         return currentMap;
+    }
+
+    public void LoadNextStage()
+    {
+        mapIndex++;
+        if (mapIndex >= maps.Length) mapIndex = 0;
+
+        GenerateMap();
     }
 
     [System.Serializable]

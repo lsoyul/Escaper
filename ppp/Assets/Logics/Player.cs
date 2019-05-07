@@ -21,8 +21,8 @@ public class Player : MonoBehaviour
         currentPosition = this.transform.position;
 
         playerRigidBody = GetComponent<Rigidbody>();
-        currentVelocity = Vector3.zero;
-        currentAcceleration = Vector3.zero;
+
+        InitializeVariables();
     }
 
     public void Move(Vector3 controllerVelocity)
@@ -50,5 +50,11 @@ public class Player : MonoBehaviour
             currentVelocity = Vector3.zero;
             playerRigidBody.velocity = Vector3.zero;
         }
+    }
+
+    public void InitializeVariables()
+    {
+        currentVelocity = Vector3.zero;
+        currentAcceleration = Vector3.zero;
     }
 }
