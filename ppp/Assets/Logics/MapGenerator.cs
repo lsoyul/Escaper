@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
+
 public class MapGenerator : MonoBehaviour
 {
     public Map[] maps;
@@ -21,7 +23,11 @@ public class MapGenerator : MonoBehaviour
     List<Coord> allTileCoords;
     Queue<Coord> shuffledTileCoords;
 
-    Map currentMap;
+    private Map currentMap;
+
+
+    // Callbacks
+    public Action onFinishGenerateMap;
 
     private void Start()
     {
@@ -67,6 +73,22 @@ public class MapGenerator : MonoBehaviour
 
                 newTile.localScale = Vector3.one * (1 - outlinePercent) * tileSize;
                 newTile.parent = mapHolder;
+
+                if (x == currentMap.startPoint.x && y == currentMap.startPoint.y)
+                {
+                    Renderer tileRenderer = newTile.GetComponent<Renderer>();
+                    Material tileMaterial = new Material(tileRenderer.sharedMaterial);
+                    tileMaterial.color = currentMap.startPointColor;
+                    tileRenderer.sharedMaterial = tileMaterial;
+                }
+
+                if (x == currentMap.finishPoint.x && y == currentMap.finishPoint.y)
+                {
+                    Renderer tileRenderer = newTile.GetComponent<Renderer>();
+                    Material tileMaterial = new Material(tileRenderer.sharedMaterial);
+                    tileMaterial.color = currentMap.finishPointColor;
+                    tileRenderer.sharedMaterial = tileMaterial;
+                }
             }
         }
 
@@ -82,7 +104,10 @@ public class MapGenerator : MonoBehaviour
             obstacleMap[randomCoord.x, randomCoord.y] = true;
             currentObstacleCount++;
 
-            if (!randomCoord.Equals(currentMap.startPoint) && MapIsFullyAccessible(obstacleMap, currentObstacleCount))
+            if (
+            !randomCoord.Equals(currentMap.startPoint) 
+            && !randomCoord.Equals(currentMap.finishPoint) 
+            && MapIsFullyAccessible(obstacleMap, currentObstacleCount))
             {
                 float obstacleHeight = Mathf.Lerp(currentMap.minObstacleHeight, currentMap.maxObstacleHeight, (float)prng.NextDouble());
 
@@ -128,6 +153,9 @@ public class MapGenerator : MonoBehaviour
         maskBottom.localScale = new Vector3(maxMapSize.x, 1, (maxMapSize.y - currentMap.mapSize.y) / 2f) * tileSize;
 
         navmeshFloor.localScale = new Vector3(maxMapSize.x, maxMapSize.y) * tileSize;
+
+        // Finish To Generate Map
+        if (onFinishGenerateMap != null) onFinishGenerateMap();
     }
 
     // Flood Fill Algorithm
@@ -138,6 +166,7 @@ public class MapGenerator : MonoBehaviour
         queue.Enqueue(currentMap.startPoint);
 
         mapFlags[currentMap.startPoint.x, currentMap.startPoint.y] = true;
+        //mapFlags[currentMap.finishPoint.x, currentMap.finishPoint.y] = true;
 
         int accessibleTileCount = 1;
 
@@ -175,9 +204,14 @@ public class MapGenerator : MonoBehaviour
         return targetAccessibleTileCount == accessibleTileCount;
     }
 
-    Vector3 CoordToPosition(int x, int y)
+    public Vector3 CoordToPosition(int x, int y)
     {
         return new Vector3(-currentMap.mapSize.x / 2f + 0.5f + x, 0, -currentMap.mapSize.y / 2f + 0.5f + y) * tileSize;
+    }
+
+    public Coord positionToCoord(Vector3 pos)
+    {
+        return new Coord();
     }
 
     public Coord GetRandomCoord()
@@ -185,6 +219,11 @@ public class MapGenerator : MonoBehaviour
         Coord randomCoord = shuffledTileCoords.Dequeue();
         shuffledTileCoords.Enqueue(randomCoord);
         return randomCoord;
+    }
+
+    public Map GetCurrentMap()
+    {
+        return currentMap;
     }
 
     [System.Serializable]
@@ -234,9 +273,13 @@ public class MapGenerator : MonoBehaviour
         public Color foreGroundColour;
         public Color backGroundColour;
 
-        public Coord startPoint
-        {
-            get { return new Coord(mapSize.x / 2, mapSize.y / 2); }
-        }
+        public Coord startPoint;
+        public Coord finishPoint;
+        public Color startPointColor;
+        public Color finishPointColor;
+        //public Coord startPoint
+        //{
+        //    get { return new Coord(mapSize.x / 2, mapSize.y / 2); }
+        //}
     }
 }

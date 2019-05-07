@@ -9,6 +9,9 @@ public class CameraControl : MonoBehaviour
     public Camera mainCamera;
     public Transform target;
 
+    public float lerpPower_Follow = 5f;
+    public float lerpPower_Zoom = 7f;
+
     [Header("- Follow Camera -")]
     public float relationalZPosFromTarget;
     public float cameraHeight = 50f;
@@ -38,9 +41,9 @@ public class CameraControl : MonoBehaviour
             //mainCamera.orthographic = false;
 
             Vector3 mainCameraTargetPos = new Vector3(target.position.x, cameraHeight, target.position.z - relationalZPosFromTarget);
-            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, mainCameraTargetPos, 3f * Time.fixedDeltaTime);
+            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, mainCameraTargetPos, lerpPower_Follow * Time.fixedDeltaTime);
 
-            float targetXRot = Mathf.LerpAngle(mainCamera.transform.rotation.eulerAngles.x, cameraXRotation, 5f * Time.fixedDeltaTime);
+            float targetXRot = Mathf.LerpAngle(mainCamera.transform.rotation.eulerAngles.x, cameraXRotation, lerpPower_Zoom * Time.fixedDeltaTime);
             mainCamera.transform.eulerAngles = new Vector3(targetXRot, 0f, 0f);
         }
         else if (cameraMode == CameraMode.ENTIRE_VIEW)
@@ -48,12 +51,12 @@ public class CameraControl : MonoBehaviour
             //mainCamera.orthographic = true;
 
             Vector3 mainCameraTargetPos = new Vector3(0f, cameraOrthographicSize, 0f);
-            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, mainCameraTargetPos, 5f * Time.fixedDeltaTime);
+            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, mainCameraTargetPos, lerpPower_Zoom * Time.fixedDeltaTime);
 
             //float targetOrthographicSize = Mathf.Lerp(mainCamera.orthographicSize, cameraOrthographicSize, 5f * Time.fixedDeltaTime);
             //mainCamera.orthographicSize = targetOrthographicSize;
 
-            float targetXRot = Mathf.LerpAngle(mainCamera.transform.rotation.eulerAngles.x, cameraXRotation_Entire, 5f * Time.fixedDeltaTime);
+            float targetXRot = Mathf.LerpAngle(mainCamera.transform.rotation.eulerAngles.x, cameraXRotation_Entire, lerpPower_Zoom * Time.fixedDeltaTime);
             mainCamera.transform.eulerAngles = new Vector3(targetXRot, 0f, 0f);
         }
     }
