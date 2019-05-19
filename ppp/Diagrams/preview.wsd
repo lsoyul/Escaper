@@ -1,0 +1,57 @@
+@startuml test
+
+class stage
+{
+    -groundTileList : 
+    -patternList : Dictionary<float time, basePattern>
+
+}
+
+class basePattern
+{
+    -time : float
+    -obstacleList : List<obstacle>
+}
+
+class Coord
+{
+    -xIndex : Integer
+    -yIndex : Integer
+}
+
+
+class obstacle
+{
+    -type : Integer
+    -posCoord : Coord
+}
+note top of obstacle
+    <Types of obstacle>
+    -Empty
+    -Killed_name1
+    -Killed_name2
+    -Damaged_name1
+    -Damaged_name2
+    -Wall
+end note
+
+class groundTile
+{
+    -type : Integer
+    -visibility : Boolean
+
+    -posCoord : Coord
+}
+note top of groundTile
+    <Types of groundTile>
+    -Empty (Collider which player able to stand off)
+    -Floor
+    -SlowArea
+    etc more..
+end note
+
+
+groundTile --> Coord
+obstacle --> Coord
+
+@enduml
