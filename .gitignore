@@ -7,5 +7,7 @@
 ppp/Library/
 ppp/obj/
 ppp/Temp/
-ppp/Assets/KUBIKOS - World/
 *.apk
+Escaper/Library/
+*.zip
+Escaper/Temp/
