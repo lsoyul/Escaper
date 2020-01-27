@@ -142,7 +142,8 @@ public class PlayerControllerScripts : MonoBehaviour
 
         currentRemainJump -= 1;
         timescale = 1.0f;
-        playerRenderer.material = dicPlayerMats["PlayerMat"];
+        playerRenderer.material.color = Color.white;
+        //playerRenderer.material = dicPlayerMats["PlayerMat"];
     }
 
     void OnPointerDown()
@@ -151,7 +152,8 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             timescale = slowDownTimescale;
             Vibration.Vibrate(3);
-            playerRenderer.material = dicPlayerMats["PlayerAdditiveMat"];
+            playerRenderer.material.color = Color.yellow;
+            //playerRenderer.material = dicPlayerMats["PlayerAdditiveMat"];
             glintAnimation.SetTrigger("Trigger");
         }
     }
@@ -163,7 +165,8 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             currentRemainJump = possibleMaxJump;
             isAirJump = false;
-            playerRenderer.material = dicPlayerMats["PlayerMat"];
+            playerRenderer.material.color = Color.white;
+            //playerRenderer.material = dicPlayerMats["PlayerMat"];
             return true;
         }
 
