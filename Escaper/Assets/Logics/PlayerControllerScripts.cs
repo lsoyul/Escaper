@@ -8,16 +8,13 @@ public class PlayerControllerScripts : MonoBehaviour
     public GameObject jumpGuide;
     public Rigidbody2D playerRigidbody2D;
     public EdgeCollider2D groundEdgeCollider;
-
-    public Transform groundCheckLeft;
-    public Transform groundCheckRight;
     public Transform groundCheckCenter;
     public float timescale = 1.0f;
     bool isSlowMode = false;
     private int possibleMaxJump = 2;
     [SerializeField] private int currentRemainJump = 2;
 
-    public float minimumYSpeed = -500f;
+    public float minimumYSpeed = -300f;
 
     public Animator playerAnimator;
     public float characterScale;
@@ -31,12 +28,24 @@ public class PlayerControllerScripts : MonoBehaviour
 
     [Header("- Sprite Renderer -")]
     public SpriteRenderer playerRenderer;
-    public Material[] playerMats;
-    private Dictionary<string, Material> dicPlayerMats;
     private float initFixedDeltaTime = 0f;
     [SerializeField] private float slowDownTimescale = 0.1f;
 
     [SerializeField] private Collider2D groundCollideObject = null;
+
+    [Header("- Player Hurting Status -")]
+    public bool canTriggerHurt = true;
+    public float unbeatableDuration = 3.0f;
+    private bool isHurting = false;
+    public float knockbackXPower = 50f;
+    public float knockbackYPower = 50f;
+    public LightBlink damagedLight;
+
+    [Header("- Player AirJump Effect -")]
+    public LightBlink airJumpLight;
+
+    [Header("- ForTest -")]
+    public Transform initPos;
 
     private void Awake() {
         if (flickController == null)
@@ -45,17 +54,14 @@ public class PlayerControllerScripts : MonoBehaviour
         }
 
         characterScale = playerAnimator.transform.localScale.x;
-        dicPlayerMats = new Dictionary<string, Material>();
         
-        foreach( Material mat in playerMats)
-        {
-            dicPlayerMats.Add(mat.name, mat);
-        }
 
         flickController.onPointerUp += OnPointerUp;
         flickController.onPointerDown += OnPointerDown;
 
         initFixedDeltaTime = Time.fixedDeltaTime;
+
+        EffectManager.GetInstance();
     }
 
     private void OnDestroy() {
@@ -118,6 +124,8 @@ public class PlayerControllerScripts : MonoBehaviour
         ControlGroundCollide();
 
         UpdateAnimator();
+
+        CheckFall();
     }
 
 
@@ -126,35 +134,68 @@ public class PlayerControllerScripts : MonoBehaviour
     {
         if (flickController.GetFlickedVector().magnitude > 1f && currentRemainJump > 0)
         {
-            playerRigidbody2D.velocity = Vector2.zero;
-            playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
 
             if (isGround == false) 
             {
+                // Air Jump!
+                playerRigidbody2D.velocity = Vector2.zero;
+                playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
+
                 isAirJump = true;
                 Vibration.Vibrate(1);
-                //GameObject go = Instantiate(Eff_jumpCloud, Eff_jumpCloud.transform.position, Eff_jumpCloud.transform.rotation);
-                //ParticleAutoDestroy particleAutoDestroy = go.GetComponent<ParticleAutoDestroy>();
-                //particleAutoDestroy.StartAutoDestroy();
+
+
+                if (flickController.GetFlickedVector().magnitude >= 100f)
+                    {
+                        bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
+
+                        Vector3 effTargetPos = Vector3.zero;
+
+                        EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_TWICE, flickController.GetFlickedVector(), xReverse, this.transform);
+                    }
+            }
+            else
+            {
+                // Ground Jump!
+                if (flickController.GetFlickedVector().y < 0)
+                {
+                    playerRigidbody2D.velocity = Vector2.zero;
+                    playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
+
+                    if (flickController.GetFlickedVector().magnitude >= 100f)
+                    {
+                        bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
+
+                        Vector3 effTargetPos = groundCheckCenter.position;
+                        effTargetPos.y = groundCheckCenter.position.y + 7.3f;
+                        
+                        if (xReverse) effTargetPos.x = groundCheckCenter.position.x - 5f;
+                        else effTargetPos.x = groundCheckCenter.position.x + 5f;
+
+                        EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_SMOKE, Vector2.zero, xReverse);
+                    }
+                }
             }
 
         }
 
+        airJumpLight.Hide();
+
         currentRemainJump -= 1;
         timescale = 1.0f;
-        playerRenderer.material.color = Color.white;
-        //playerRenderer.material = dicPlayerMats["PlayerMat"];
     }
 
     void OnPointerDown()
     {
-        if (currentRemainJump > 0 && isGround == false)
+        if (currentRemainJump > 0 && isGround == false && isHurting == false)
         {
             timescale = slowDownTimescale;
             Vibration.Vibrate(3);
             playerRenderer.material.color = Color.yellow;
             //playerRenderer.material = dicPlayerMats["PlayerAdditiveMat"];
             glintAnimation.SetTrigger("Trigger");
+
+            airJumpLight.StartBlink();
         }
     }
 
@@ -166,7 +207,11 @@ public class PlayerControllerScripts : MonoBehaviour
             currentRemainJump = possibleMaxJump;
             isAirJump = false;
             playerRenderer.material.color = Color.white;
+
+            isHurting = false;
             //playerRenderer.material = dicPlayerMats["PlayerMat"];
+            timescale = 1.0f;
+            airJumpLight.Hide();
             return true;
         }
 
@@ -185,17 +230,6 @@ public class PlayerControllerScripts : MonoBehaviour
         else groundCollideObject = null;
 
         return groundHit;
-
-        //RaycastHit2D leftHit = Physics2D.Raycast(groundCheckLeft.position, Vector2.down, 0.1f);
-        //RaycastHit2D rightHit = Physics2D.Raycast(groundCheckRight.position, Vector2.down, 0.1f);
-
-        //Debug.DrawRay(groundCheckLeft.position, Vector2.down, Color.red);
-        //Debug.DrawRay(groundCheckRight.position, Vector2.down, Color.red);
-
-        //if (leftHit) Debug.Log("LeftHit :" + leftHit);
-        //if (rightHit) Debug.Log("Right Hit:" + rightHit);
-
-        //return leftHit || rightHit;
     }
 
     void UpdateAnimator()
@@ -204,6 +238,7 @@ public class PlayerControllerScripts : MonoBehaviour
         playerAnimator.SetBool("isHoldingTouch", flickController.GetIsHolding());
         playerAnimator.SetFloat("vSpeed", playerRigidbody2D.velocity.y);
         playerAnimator.SetBool("isAirJump", isAirJump);
+        playerAnimator.SetBool("isHurting", isHurting);
         glintAnimation.speed = 1f / Time.timeScale;
 
         //Debug.Log("vSpeed : " + playerRigidbody2D.velocity.y);
@@ -213,7 +248,14 @@ public class PlayerControllerScripts : MonoBehaviour
         if ((tVec.x < 0 && playerRigidbody2D.velocity.x > 0)
         || (tVec.x > 0 && playerRigidbody2D.velocity.x < 0))
         {
-            tVec.x *= -1;
+            
+            if (isHurting == true) 
+            {
+                if (playerRigidbody2D.velocity.x > 0) tVec.x = -Mathf.Abs(tVec.x);
+                else tVec.x = Mathf.Abs(tVec.x);
+            }
+            else tVec.x *= -1;
+
             playerAnimator.transform.localScale = tVec;
         }
 
@@ -245,6 +287,77 @@ public class PlayerControllerScripts : MonoBehaviour
     public GameObject GetJumpGuide()
     {
         return jumpGuide;
-    } 
+    }
+
+    void CheckFall()
+    {
+        if (this.transform.position.y < -200f)
+        {
+            playerRigidbody2D.position = initPos.position;
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D collider)
+    {
+        if (collider != null)
+        {
+            switch(collider.tag)
+            {
+                case "Damage_spike":{
+                    Debug.Log("Damage_spike");
+                    if (canTriggerHurt)
+                    {
+                        Debug.Log("---------------------Hit!");
+                        damagedLight.StartBlink(this.unbeatableDuration);
+                        StartCoroutine(TriggerHurt(collider, this.unbeatableDuration));
+                    }
+                }
+                break;
+            }
+
+            
+        }
+    }
+
+    
+
+    IEnumerator TriggerHurt(Collider2D collider, float unbeatableDuration)
+    {
+        float timer = 0f;
+        canTriggerHurt = false;
+        isHurting = true;
+        currentRemainJump = 0;
+        timescale = 1.0f;
+
+        // Controll Rigidbody
+        bool isLeftKnockback 
+        = (collider.transform.position.x > playerRigidbody2D.transform.position.x) ? true : false;
+
+        float xKnockbackPower = Mathf.Abs(knockbackXPower);
+        if (isLeftKnockback) xKnockbackPower = -xKnockbackPower;
+
+        playerRigidbody2D.velocity = Vector2.zero;
+        playerRigidbody2D.AddForce(new Vector2(xKnockbackPower, knockbackYPower), ForceMode2D.Impulse);
+
+        while (timer < unbeatableDuration)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        canTriggerHurt = true;
+
+        yield break;
+    }
+
+    #region TEST
+
+    [ContextMenu("PlayJumpSmoke")]
+    void PlayJumpsmoke()
+    {
+        EffectManager.GetInstance().playEffect(playerRigidbody2D.position, GameStatics.EFFECT.JUMP_SMOKE, Vector2.zero);
+    }
+
+    #endregion
 
 }

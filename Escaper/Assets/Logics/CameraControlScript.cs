@@ -14,7 +14,9 @@ public class CameraControlScript : MonoBehaviour {
 
     private float cameraOrthogonalInitialSize = 160f;
     private bool camFixedXAxis = true;
-    public UnityEngine.UI.Text camModeText;
+
+    public float levelMinXAxis = -50f;
+    public float levelMaxXAxis = 110f;
 
 	// Use this for initialization
         void Start () {
@@ -32,7 +34,6 @@ public class CameraControlScript : MonoBehaviour {
             cam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
         }
 
-        camModeText.text = string.Format("Change CamMode\nFix-XAxis : {0}", camFixedXAxis);
         targetPos = Vector3.zero;
 	}
 	
@@ -50,15 +51,19 @@ public class CameraControlScript : MonoBehaviour {
                 targetPos = player.position;
                 //targetPos.x = 0f;
 
-                if (flickController.GetIsHolding() == true && camFixedXAxis == false)
-                {
-                    targetPos.x = player.position.x + flickController.GetFlickedVector().x * -0.1f;
-                    targetPos.y = player.position.y + flickController.GetFlickedVector().y * -0.1f;
-                }
+                //if (flickController.GetIsHolding() == true && camFixedXAxis == false)
+                //{
+                //    targetPos.x = player.position.x + flickController.GetFlickedVector().x * -0.1f;
+                //    targetPos.y = player.position.y + flickController.GetFlickedVector().y * -0.1f;
+                //}
 
                 if (targetPos.y < 0f) targetPos.y = 0f;
-                if (camFixedXAxis) targetPos.x = 0f;
-
+                if (camFixedXAxis) 
+                {
+                    if (targetPos.x < levelMinXAxis) targetPos.x = levelMinXAxis;
+                    if (targetPos.x > levelMaxXAxis) targetPos.x = levelMaxXAxis;
+                }
+                
                 cameraTransform.position = Vector2.Lerp(cameraTransform.position, targetPos, 0.2f);
                 cameraTransform.position = new Vector3(cameraTransform.position.x, cameraTransform.position.y, -10f);
 	}
@@ -66,7 +71,9 @@ public class CameraControlScript : MonoBehaviour {
     public void ChangeCameraMode()
     {
         camFixedXAxis = !camFixedXAxis;
+    }
 
-        camModeText.text = string.Format("Change CamMode\nFix-XAxis : {0}", camFixedXAxis);
+    public Vector3 GetTargetPos(){
+        return targetPos;
     }
 }

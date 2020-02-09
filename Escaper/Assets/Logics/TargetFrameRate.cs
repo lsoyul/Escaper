@@ -4,10 +4,19 @@ using UnityEngine;
 
 public class TargetFrameRate : MonoBehaviour
 {
+    public static bool isInit = false;
     public int targetFrame = 60;
     // Start is called before the first frame update
     private void Awake() {
-        DontDestroyOnLoad(this.gameObject);    
+        if (isInit == false)
+        {
+            DontDestroyOnLoad(this.gameObject);    
+            isInit = true;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
     void Start()
     {

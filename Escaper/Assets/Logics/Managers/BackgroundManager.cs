@@ -4,23 +4,38 @@ using UnityEngine;
 
 public class BackgroundManager : MonoBehaviour
 {
-    public Transform tracingPlayer;
-    public Transform background;
+    public CameraControlScript baseCamera;
+    public Transform[] backgrounds;
 
+    private Vector3 initCameraPos;
     private Vector3 initPlayerPos;
     private Vector3 initBGPos;
     void Start()
     {
-        initPlayerPos = new Vector3(tracingPlayer.position.x, tracingPlayer.position.y, tracingPlayer.position.z);
-        initBGPos = new Vector3(background.position.x, background.position.y, background.position.z);
+        initCameraPos = new Vector3(baseCamera.transform.position.x, baseCamera.transform.position.y, baseCamera.transform.position.z);
+        if (backgrounds != null)
+        {
+            if (backgrounds.Length > 0)
+                initBGPos = new Vector3(backgrounds[0].position.x, backgrounds[0].position.y, backgrounds[0].position.z);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        float playerDiff = tracingPlayer.position.y - initPlayerPos.y;
-        Vector3 bgDiff = Vector2.up * playerDiff * 0.2f;
+        float cameraXDiff = baseCamera.transform.position.x - initCameraPos.x;
 
-        background.transform.position = initBGPos - bgDiff;
+        for (int i = 0; i < backgrounds.Length; i++)
+        {
+            if (i != (backgrounds.Length-1))
+            {
+                Vector3 bgDiff = new Vector3();
+                float xOffset = cameraXDiff * i * 0.15f;
+                bgDiff.x = xOffset;
+                backgrounds[i].transform.position = initBGPos - bgDiff;
+            }
+        }
+
+
     }
 }

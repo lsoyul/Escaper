@@ -1,27 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+using UnityEngine.UI;
 
 public class TestScript : MonoBehaviour
 {
-    public GameObject[] levels;
-    public int currentLevel = 0;
+    public Text sceneString;
+    public Text levelString;
 
-    public void ChangeTileLevel()
+    public void OnClickChangeScene()
     {
-        if (++currentLevel >= levels.Length) currentLevel = 0;
-        ActiveLevel(currentLevel);
+        int sceneNum = int.Parse(sceneString.text);
+
+        if (sceneNum >= 0 && sceneNum <= 3) TopMostControl.Instance().StartChangeScene((GameStatics.SCENE_INDEX)sceneNum, true);
     }
 
-    void ActiveLevel(int level)
+    public void OnClickChangeLevel()
     {
-        if (levels.Length > level)
+        int levelNum = int.Parse(levelString.text);
+
+        if (levelNum >= 0 && levelNum <= StageLoader.Instance().stageList.Count) 
         {
-            for (int i=0; i<levels.Length; i++)
-            {
-                if (i == level) levels[i].SetActive(true);
-                else levels[i].SetActive(false);
-            }
+            StageLoader.Instance().SetStage(levelNum);
         }
     }
 }
