@@ -184,6 +184,6 @@ public class MainMenuControl : MonoBehaviour
 
     public void OnClickNewGame()
     {
-        TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMING, true);
+        TopMostControl.Instance().StartChangeScene(SCENE_INDEX.CUTSCENE, true);
     }
 }

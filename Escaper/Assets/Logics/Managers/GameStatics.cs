@@ -21,7 +21,8 @@ public static class GameStatics
     {
         LOADING = 0,
         MAINMENU = 1,
-        GAMING = 2
+        GAMING = 2,
+        CUTSCENE = 3
     }
 
     public enum EFFECT
