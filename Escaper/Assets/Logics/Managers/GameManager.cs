@@ -4,6 +4,10 @@ using UnityEngine;
 
 using System;
 
+// Use Google Play Services
+using GooglePlayGames;
+using GooglePlayGames.BasicApi;
+
 public class GameManager : MonoBehaviour
 {
     private GameStatics.GAME_STATUS currentGameStatus;
@@ -13,17 +17,32 @@ public class GameManager : MonoBehaviour
     }
 
     public Action<GameStatics.GAME_STATUS, GameStatics.GAME_STATUS> onChangeGameStatus;
-    
+    public Action<GameStatics.LOGIN_TYPE> onLoginFinish;
+    public Action onSignout;
 
+    private static GameObject container;
     private static GameManager instance;
-    public GameManager Instance
+    public static GameManager Instance()
     {
-        get {
-            if (instance == null) instance = GetComponent<GameManager>();
-            
-            return instance;
+        if (instance == null)
+        {
+            container = new GameObject();
+            container.name = "GameManager";
+            instance = container.AddComponent(typeof(GameManager)) as GameManager;
         }
+
+        return instance;
     }
+
+    #region #### FireBase App ####
+
+    public Firebase.FirebaseApp FirebaseApp;
+    public Firebase.Auth.FirebaseAuth FirebaseAuth;
+
+    #endregion
+
+
+    bool isGameInitialize = false;
 
     private void Awake() {
         
@@ -39,11 +58,26 @@ public class GameManager : MonoBehaviour
 
         currentGameStatus = GameStatics.GAME_STATUS.NONE;
         ChangeGameStatus(GameStatics.GAME_STATUS.SPLASH);
+
     }
     
     void Start()
     {
         Input.multiTouchEnabled = false;
+
+        // 1. Load GameConfigs
+        // 2. Set PlayerStatus
+        if (isGameInitialize == false)
+        {
+            GameConfigs.LoadConfigs();
+            PlayerManager.Instance().InitializePlayer();
+
+            isGameInitialize = true;
+        }
+
+        // Set Player
+
+
         //Screen.SetResolution(720, 1280, true, 60);
     }
 
@@ -53,5 +87,158 @@ public class GameManager : MonoBehaviour
         currentGameStatus = nextStatus;
 
         if (onChangeGameStatus != null) onChangeGameStatus(beforeGameStatus, currentGameStatus);
+    }
+
+    void GooglePlayServiceInit()
+    {
+        PlayGamesClientConfiguration config
+            = new PlayGamesClientConfiguration.Builder()
+            .RequestIdToken()
+            .Build();
+
+        PlayGamesPlatform.InitializeInstance(config);
+        PlayGamesPlatform.DebugLogEnabled = true;
+        PlayGamesPlatform.Activate();
+    }
+
+    public void SetAnonymousPlay()
+    {
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.FAIL);
+        }
+        else
+        {
+            FirebaseAuth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+            FirebaseAuth.SignInAnonymouslyAsync().ContinueWith(task =>
+            {
+                if (task.IsCompleted && !task.IsCanceled && !task.IsFaulted)
+                {
+                    // User is now signed in.
+
+                    Firebase.Auth.FirebaseUser newUser = task.Result;
+
+                    Debug.Log(string.Format("FirebaseUser:{0}\nEmail:{1}", newUser.UserId, newUser.Email));
+
+                    Firebase.Analytics.FirebaseAnalytics.LogEvent(Firebase.Analytics.FirebaseAnalytics.EventLogin, "LoginType", GameStatics.EVENT_LOGIN_ANONYMOUS);
+
+                    if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.ANONYMOUS);
+                }
+                else
+                {
+                    Debug.Log("failed");
+                    if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.FAIL);
+                }
+            });
+        }
+    }
+
+    public void OnClickGoogleLogin()
+    {
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.FAIL);
+        }
+        else
+        {
+            GooglePlayServiceInit();
+            InitializeFireBase();
+
+            if (!Social.localUser.authenticated)
+            {
+                Social.localUser.Authenticate((bool bSuccess, string str) =>
+                {
+                    if (bSuccess)
+                    {
+                        Debug.Log("Success : " + Social.localUser.userName);
+
+                        StartCoroutine(coLogin());
+                    }
+                    else
+                    {
+                        Debug.Log("Login Fail");
+                        SetAnonymousPlay();
+                    }
+                });
+            }
+            else
+            {
+                // Already google logined
+                // => Firebase login
+                StartCoroutine(coLogin());
+            }
+        }
+            
+    }
+
+    IEnumerator coLogin()
+    {
+        Debug.Log(string.Format("\nTry to get Token..."));
+        while (System.String.IsNullOrEmpty(((PlayGamesLocalUser)Social.localUser).GetIdToken()))
+            yield return null;
+
+        string idToken = ((PlayGamesLocalUser)Social.localUser).GetIdToken();
+
+        Debug.Log(string.Format("\nToken:{0}", idToken));
+        FirebaseAuth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+
+        Firebase.Auth.Credential credential = Firebase.Auth.GoogleAuthProvider.GetCredential(idToken, null);
+        FirebaseAuth.SignInWithCredentialAsync(credential).ContinueWith(
+            task =>
+            {
+                if (task.IsCompleted && !task.IsCanceled && !task.IsFaulted)
+                {
+                    // User is now signed in.
+                    Firebase.Auth.FirebaseUser newUser = task.Result;
+                    Debug.Log(string.Format("FirebaseUser:{0}\nEmail:{1}", newUser.UserId, newUser.Email));
+
+                    Firebase.Analytics.FirebaseAnalytics.LogEvent(Firebase.Analytics.FirebaseAnalytics.EventLogin, "LoginType", GameStatics.EVENT_LOGIN_GOOGLE);
+
+                    if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.GOOGLE);
+                }
+                else
+                {
+
+                    if (onLoginFinish != null) onLoginFinish(GameStatics.LOGIN_TYPE.FAIL);
+                }
+            });
+    }
+
+    public void OnClickGoogleLogout()
+    {
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            Debug.Log("Error. Check internet connection!");
+        }
+        else
+        {
+            ((PlayGamesPlatform)Social.Active).SignOut();
+
+            Firebase.Analytics.FirebaseAnalytics.LogEvent(Firebase.Analytics.FirebaseAnalytics.EventLogin, "LoginType", GameStatics.EVENT_LOGOUT);
+        }
+
+        if (onSignout != null) onSignout();
+    }
+
+    void InitializeFireBase()
+    {
+        Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+            var dependencyStatus = task.Result;
+            if (dependencyStatus == Firebase.DependencyStatus.Available)
+            {
+                // Create and hold a reference to your FirebaseApp,
+                // where app is a Firebase.FirebaseApp property of your application class.
+                //   app = Firebase.FirebaseApp.DefaultInstance;
+                FirebaseApp = Firebase.FirebaseApp.DefaultInstance;
+
+                // Set a flag here to indicate whether Firebase is ready to use by your app.
+            }
+            else
+            {
+                UnityEngine.Debug.LogError(System.String.Format(
+                  "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+                // Firebase Unity SDK is not safe to use here.
+            }
+        });
     }
 }

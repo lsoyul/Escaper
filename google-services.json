@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "724659234634",
+    "firebase_url": "https://escaper-62345417.firebaseio.com",
+    "project_id": "escaper-62345417",
+    "storage_bucket": "escaper-62345417.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724659234634:android:141a8acfb56b83ba2183b3",
+        "android_client_info": {
+          "package_name": "com.TryCatch.Escaper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "724659234634-7vrfnl11su3bj341bov7571ja615k7md.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXPTSbqnesR0M84q3oGml9-YlL45465gw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "724659234634-7vrfnl11su3bj341bov7571ja615k7md.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

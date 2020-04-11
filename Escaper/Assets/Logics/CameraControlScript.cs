@@ -2,13 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using static GameStatics;
+
 public class CameraControlScript : MonoBehaviour {
 
     //public UnityEngine.UI.Text text;
-    public Transform player;
+    public PlayerControllerScripts player;
     Transform cameraTransform;
     public FlickController flickController;
     Camera cam;
+
+    [Header("- Camera Shake -")]
+    
+    public TweenTransforms tweener;
+    bool isShaking = false;
+    int cameraShakeRemainCount = 0;
 
     private Vector3 targetPos = new Vector3();
 
@@ -17,6 +25,22 @@ public class CameraControlScript : MonoBehaviour {
 
     public float levelMinXAxis = -50f;
     public float levelMaxXAxis = 110f;
+
+    /// <summary>
+    /// This function is called when the object becomes enabled and active.
+    /// </summary>
+    void OnEnable()
+    {
+        PlayerManager.Instance().onDamaged += OnDamaged;
+    }
+
+    /// <summary>
+    /// This function is called when the behaviour becomes disabled or inactive.
+    /// </summary>
+    void OnDisable()
+    {
+        PlayerManager.Instance().onDamaged -= OnDamaged;
+    }
 
 	// Use this for initialization
         void Start () {
@@ -48,7 +72,7 @@ public class CameraControlScript : MonoBehaviour {
             
                 //text.text = cam.orthographicSize.ToString();
 
-                targetPos = player.position;
+                targetPos = player.transform.position;
                 //targetPos.x = 0f;
 
                 //if (flickController.GetIsHolding() == true && camFixedXAxis == false)
@@ -75,5 +99,51 @@ public class CameraControlScript : MonoBehaviour {
 
     public Vector3 GetTargetPos(){
         return targetPos;
+    }
+
+    private void OnDamaged(DAMAGED_TYPE damagedType)
+    {
+        switch (damagedType)
+        {
+            case DAMAGED_TYPE.SPIKE:
+            CameraShake(3);
+            break;
+        }
+    }
+
+    public void CameraShake(int count)
+    {
+        if (isShaking == false)
+        {
+            Vibration.Vibrate(2);
+            cameraShakeRemainCount = count;
+            isShaking = true;
+
+            cameraShakeRemainCount--;
+            tweener.Begin();
+            tweener.transform.localPosition = tweener.startingVector;
+            tweener.TweenCompleted += shakeCompleteEvent;
+        }
+    }
+
+    void shakeCompleteEvent()
+    {
+        //Debug.Log("TweenComplete!");
+        if (cameraShakeRemainCount > 0)
+        {
+            //Debug.Log("reset tween");
+            cameraShakeRemainCount--;
+            tweener.Reset();
+            tweener.transform.localPosition = tweener.startingVector;
+
+            if (cameraShakeRemainCount <= 0) 
+            {
+                //Debug.Log("shake finish");
+                cameraShakeRemainCount = 0;
+                isShaking = false;
+
+                tweener.TweenCompleted -= shakeCompleteEvent;
+            }
+        }   
     }
 }

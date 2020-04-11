@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
+using static GameStatics;
+
 public class PlayerControllerScripts : MonoBehaviour
 {
     public FlickController flickController;
@@ -35,11 +38,14 @@ public class PlayerControllerScripts : MonoBehaviour
 
     [Header("- Player Hurting Status -")]
     public bool canTriggerHurt = true;
-    public float unbeatableDuration = 3.0f;
+    public float unbeatableDuration_hurt = 3.0f;
+    public float unbeatableDuration_revive = 5.0f;
     private bool isHurting = false;
     public float knockbackXPower = 50f;
     public float knockbackYPower = 50f;
     public LightBlink damagedLight;
+    public LightBlink reviveLight;
+
 
     [Header("- Player AirJump Effect -")]
     public LightBlink airJumpLight;
@@ -59,6 +65,8 @@ public class PlayerControllerScripts : MonoBehaviour
         flickController.onPointerUp += OnPointerUp;
         flickController.onPointerDown += OnPointerDown;
 
+        PlayerManager.Instance().onDeath += OnDeath;
+
         initFixedDeltaTime = Time.fixedDeltaTime;
 
         EffectManager.GetInstance();
@@ -70,13 +78,20 @@ public class PlayerControllerScripts : MonoBehaviour
             flickController.onPointerUp -= OnPointerUp;
             flickController.onPointerDown -= OnPointerDown;
         }
+
+        if (PlayerManager.HasInstance())
+        {
+            PlayerManager.Instance().onDeath -= OnDeath;
+        }
     }
 
     private void Update() {
         Time.timeScale = timescale;
         if (timescale < 1.0f) Time.fixedDeltaTime = slowDownTimescale * timescale * GameStatics.fixedDeltaOffset;
         else Time.fixedDeltaTime = initFixedDeltaTime;
-        
+
+        bool beforeGround = isGround;
+
         isGround = CheckGround();
 
         if (flickController.GetIsHolding() && currentRemainJump > 0)
@@ -126,6 +141,14 @@ public class PlayerControllerScripts : MonoBehaviour
         UpdateAnimator();
 
         CheckFall();
+
+        if (beforeGround == false)
+        {
+            if (isGround == true)
+            {
+                PlayerManager.Instance().OnGround();
+            }
+        }
     }
 
 
@@ -239,6 +262,8 @@ public class PlayerControllerScripts : MonoBehaviour
         playerAnimator.SetFloat("vSpeed", playerRigidbody2D.velocity.y);
         playerAnimator.SetBool("isAirJump", isAirJump);
         playerAnimator.SetBool("isHurting", isHurting);
+        playerAnimator.SetBool("isDead", PlayerManager.Instance().IsDead);
+
         glintAnimation.speed = 1f / Time.timeScale;
 
         //Debug.Log("vSpeed : " + playerRigidbody2D.velocity.y);
@@ -299,23 +324,25 @@ public class PlayerControllerScripts : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collider)
     {
+        if (PlayerManager.Instance().IsDead) return;
+
         if (collider != null)
         {
             switch(collider.tag)
             {
                 case "Damage_spike":{
-                    Debug.Log("Damage_spike");
                     if (canTriggerHurt)
                     {
-                        Debug.Log("---------------------Hit!");
-                        damagedLight.StartBlink(this.unbeatableDuration);
-                        StartCoroutine(TriggerHurt(collider, this.unbeatableDuration));
+                        //Debug.Log("Damage_spike");
+                        //Debug.Log("---------------------Hit!");
+                        damagedLight.StartBlink(this.unbeatableDuration_hurt);
+                        StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
+
+                        PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.SPIKE);                        
                     }
                 }
                 break;
-            }
-
-            
+            }       
         }
     }
 
@@ -350,12 +377,48 @@ public class PlayerControllerScripts : MonoBehaviour
         yield break;
     }
 
+    IEnumerator TriggerOverWhelming(float unbeatableDuration)
+    {
+        reviveLight.StartBlink(unbeatableDuration);
+        float timer = 0f;
+        canTriggerHurt = false;
+        isHurting = false;
+        timescale = 1.0f;
+
+        playerRigidbody2D.velocity = Vector2.zero;
+
+        while (timer < unbeatableDuration)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        canTriggerHurt = true;
+
+        yield break;
+    }
+
+    void OnDeath(bool isDead)
+    {
+        if (isDead == false)
+        {
+            // Revive!
+            StartCoroutine(TriggerOverWhelming(this.unbeatableDuration_revive));
+        }
+    }
+
     #region TEST
 
     [ContextMenu("PlayJumpSmoke")]
     void PlayJumpsmoke()
     {
         EffectManager.GetInstance().playEffect(playerRigidbody2D.position, GameStatics.EFFECT.JUMP_SMOKE, Vector2.zero);
+    }
+
+    [ContextMenu("Revive")]
+    void TEST_Revive()
+    {
+        PlayerManager.Instance().PlayerStatus.CurrentHP = PlayerManager.Instance().PlayerStatus.MaxHP;
     }
 
     #endregion

@@ -27,6 +27,11 @@ public class TopMostControl : MonoBehaviour
         return instance;
     }
 
+    public static bool HasInstance()
+    {
+        return instance;
+    }
+
     private void Awake() {
         
         if (instance == null) 
@@ -64,15 +69,14 @@ public class TopMostControl : MonoBehaviour
         blackPanelAlpha.Begin();
         blackPanelAlpha.value = blackPanelAlpha.startValue;
 
-        if (scene.buildIndex == (int)SCENE_INDEX.GAMING) {
-            StageLoader.Instance().SetStage(1);
-        } 
-        else {
+        if (scene.buildIndex == (int)SCENE_INDEX.GAMESTAGE)
+            StageLoader.Instance().SetStage(StageLoader.NextStage);
+        else
             StageLoader.Instance().DisableStage();
-        }
+        
     }
 
-    public void StartChangeScene(SCENE_INDEX targetSceneIndex, bool smoothChange)
+    public void StartChangeScene(SCENE_INDEX targetSceneIndex, bool smoothChange, int nextStageNum = 1)
     {
         isChangingState = true;
         blackPanelAlpha.startValue = 0f;
@@ -81,6 +85,8 @@ public class TopMostControl : MonoBehaviour
         blackPanelAlpha.TweenCompleted += SceneFadeoutFinishEvent;
         blackPanelAlpha.Begin();
         blackPanelAlpha.value = blackPanelAlpha.startValue;
+
+        StageLoader.NextStage = nextStageNum;
     }
 
     void SceneFadeoutFinishEvent()
@@ -91,4 +97,57 @@ public class TopMostControl : MonoBehaviour
             blackPanelAlpha.TweenCompleted -= SceneFadeoutFinishEvent;
         }
     }
+
+    public bool GetIsSceneChanging()
+    {
+        return isChangingState;
+    }
+
+    #region ### GameOverUI ###
+
+    [Header("- GameOverUI -")]
+    public TweenTransforms gameOverTweenTrans;
+    public UnityEngine.UI.Text shardsAmountsToRevive;
+
+    private float outXPos_gameOverUI = 900;
+    private float inXPos_gameOverUI = 0;
+
+    public System.Action<MENU_GAMEOVER> onClickGameOverMenu;
+
+    public void ShowGameOver(bool isShow)
+    {
+        if (isShow)
+        {
+            int shardsAmounts = PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2;
+            shardsAmountsToRevive.text = "-"+shardsAmounts.ToString();
+            gameOverTweenTrans.startingVector.x = outXPos_gameOverUI;
+            gameOverTweenTrans.endVector.x = inXPos_gameOverUI;
+        }
+        else
+        {
+            gameOverTweenTrans.startingVector.x = inXPos_gameOverUI;
+            gameOverTweenTrans.endVector.x = outXPos_gameOverUI;
+        }
+
+        gameOverTweenTrans.Begin();
+        gameOverTweenTrans.defaultVector = gameOverTweenTrans.startingVector;
+    }
+
+    public void OnClick_GO_MainMenu()
+    {
+        if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.MAINMENU);
+    }
+    public void OnClick_GO_Retry()
+    {
+        if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.RETRY);
+    }
+    public void OnClick_GO_ReviveShards()
+    {
+        if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.REVIVE_SHARDS);
+    }
+    public void OnClick_GO_ReviveAd()
+    {
+        if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.REVIVE_AD);
+    }
+    #endregion
 }

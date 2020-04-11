@@ -28,6 +28,11 @@ public class MainMenuControl : MonoBehaviour
     public TweenTransforms mainTitle_transformTween;
     private bool mainTitle_animatingStart = false;
 
+    [Header("- Buttons -")]
+    public GameObject Btn_GoogleLogin;
+    public GameObject Btn_AnonymousPlay;
+    public GameObject Btn_Logout;
+
     public TweenTransforms Btn_Newgame;
     public TweenTransforms Btn_Continue;
 
@@ -36,7 +41,10 @@ public class MainMenuControl : MonoBehaviour
     [Header("- Camera -")]
     public Camera mainCam;
     private float cameraOrthogonalInitialSize = 160f;
-    
+
+    [Header("- DebugTest -")]
+    public UnityEngine.UI.Text debugText;
+
 
     // Start is called before the first frame update
     /// <summary>
@@ -56,8 +64,22 @@ public class MainMenuControl : MonoBehaviour
             mainCam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
         }
     }
+
+    private void OnEnable()
+    {
+        GameManager.Instance().onLoginFinish += OnGoogleLoginFinish;
+        GameManager.Instance().onSignout += OnSignOut;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance().onLoginFinish -= OnGoogleLoginFinish;
+        GameManager.Instance().onSignout -= OnSignOut;
+    }
     void Start()
     {
+        Btn_Logout.SetActive(false);
+
         Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
         Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
         mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
@@ -95,11 +117,6 @@ public class MainMenuControl : MonoBehaviour
                 mainTitle_transformTween.Begin();
                 mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
 
-                Btn_Newgame.Begin();
-                Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
-
-                Btn_Continue.Begin();
-                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
             }
         };
 
@@ -166,12 +183,6 @@ public class MainMenuControl : MonoBehaviour
             {
                 mainTitle_transformTween.Begin();
                 mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
-                
-                Btn_Newgame.Begin();
-                Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
-
-                Btn_Continue.Begin();
-                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
 
                 mainTitle_animatingStart = true;
             }
@@ -184,6 +195,84 @@ public class MainMenuControl : MonoBehaviour
 
     public void OnClickNewGame()
     {
-        TopMostControl.Instance().StartChangeScene(SCENE_INDEX.CUTSCENE, true);
+        if (TopMostControl.Instance().GetIsSceneChanging() == false)
+        {
+            TopMostControl.Instance().StartChangeScene(SCENE_INDEX.CUTSCENE, true);
+        }
+    }
+
+
+
+#if UNITY_EDITOR
+    public void ClickGoogleLogin()
+    {
+        OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
+    }
+
+    public void ClickGoogleLogout()
+    {
+        OnSignOut();
+    }
+
+    public void ClickWithoutLogin()
+    {
+        OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
+    }
+#else
+    public void ClickGoogleLogin()
+    {
+        GameManager.Instance().OnClickGoogleLogin();
+    }
+
+    public void ClickGoogleLogout()
+    {
+        GameManager.Instance().OnClickGoogleLogout();
+    }
+
+    public void ClickWithoutLogin()
+    {
+        GameManager.Instance().SetAnonymousPlay();
+    }
+#endif
+
+    void OnGoogleLoginFinish(GameStatics.LOGIN_TYPE loginType)
+    {
+        switch (loginType)
+        {
+            case LOGIN_TYPE.FAIL:
+                debugText.text = "Offline";
+                break;
+            case LOGIN_TYPE.ANONYMOUS:
+                debugText.text = "Guest";
+                break;
+            case LOGIN_TYPE.GOOGLE:
+                debugText.text = Social.localUser.userName;
+                break;
+            default:
+                break;
+        }
+
+
+        Btn_GoogleLogin.SetActive(false);
+        Btn_AnonymousPlay.SetActive(false);
+        Btn_Logout.SetActive(true);
+
+        Btn_Newgame.Begin();
+        Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+
+        Btn_Continue.Begin();
+        Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+    }
+
+    void OnSignOut()
+    {
+        Btn_GoogleLogin.SetActive(true);
+        Btn_AnonymousPlay.SetActive(true);
+        Btn_Logout.SetActive(false);
+
+        Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+        Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+
+        debugText.text = "Offline";
     }
 }

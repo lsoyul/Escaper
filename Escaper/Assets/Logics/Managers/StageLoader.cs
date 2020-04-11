@@ -7,6 +7,10 @@ public class StageLoader : MonoBehaviour
     public List<GameObject> stageList;
     private static GameObject container;
     private static StageLoader instance;
+
+    public static int CurrentStage = 1;
+    public static int NextStage = 1;
+
     public static StageLoader Instance()
     {
         if (instance == null)
@@ -30,9 +34,17 @@ public class StageLoader : MonoBehaviour
 
     public void SetStage(int targetStage)
     {
-        int stage = targetStage - 1;
-        if (targetStage > stageList.Count) return;
+        int tarStage = targetStage;
+        if (tarStage > stageList.Count)
+        {
+            tarStage = 1;
+        }
 
+        CurrentStage = tarStage;
+        PlayerManager.Instance().InitializePlayer();
+
+        int stage = tarStage - 1;
+        
         for (int i = 0; i < stageList.Count; i++)
         {
             if (stage == i) stageList[i].SetActive(true);

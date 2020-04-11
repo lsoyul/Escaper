@@ -29,8 +29,11 @@ public class FlickController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        direction = Vector2.up * floatingJoystick.Vertical + Vector2.right * floatingJoystick.Horizontal;
-        flickPower = direction.magnitude * multipliedValue;
+        if (CheckControllableStatus())
+        {
+            direction = Vector2.up * floatingJoystick.Vertical + Vector2.right * floatingJoystick.Horizontal;
+            flickPower = direction.magnitude * multipliedValue;
+        }
     }
 
     public Vector2 GetFlickedVector()
@@ -40,19 +43,40 @@ public class FlickController : MonoBehaviour
 
     void OnPointerUp()
     {
-        isHolding = false;
-        if (onPointerUp != null) onPointerUp();
+        if (CheckControllableStatus())
+        {
+            isHolding = false;
+            if (onPointerUp != null) onPointerUp();
+        }
     }
 
     void OnPointerDown()
     {
-        isHolding = true;
-        if (onPointerDown != null) onPointerDown();
+        if (CheckControllableStatus())
+        {
+            isHolding = true;
+            if (onPointerDown != null) onPointerDown();
+        }
     }
 
     public bool GetIsHolding()
     {
-        return isHolding;
+        if (CheckControllableStatus())
+        {
+            return isHolding;
+        }
+        else
+        {
+            isHolding = false;
+            return isHolding;
+        }
+    }
+
+    bool CheckControllableStatus()
+    {
+        if (PlayerManager.Instance().IsDead) return false;
+
+        return true;
     }
 }
 
