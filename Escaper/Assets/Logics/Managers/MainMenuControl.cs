@@ -9,8 +9,6 @@ using static GameStatics;
 
 public class MainMenuControl : MonoBehaviour
 {
-    public FloatingJoystick floatingJoystick;
-
     public Light2D global2DLight;
     public Light2D light1;
     public GameObject mainTitle;
@@ -29,62 +27,43 @@ public class MainMenuControl : MonoBehaviour
     private bool mainTitle_animatingStart = false;
 
     [Header("- Buttons -")]
-    public GameObject Btn_GoogleLogin;
-    public GameObject Btn_AnonymousPlay;
-    public GameObject Btn_Logout;
+    //public GameObject Btn_GoogleLogin;
+    //public GameObject Btn_AnonymousPlay;
+    //public GameObject Btn_Logout;
 
     public TweenTransforms Btn_Newgame;
     public TweenTransforms Btn_Continue;
 
     bool isEndAnimating = false;
 
-    [Header("- Camera -")]
-    public Camera mainCam;
-    private float cameraOrthogonalInitialSize = 160f;
-
     [Header("- DebugTest -")]
     public UnityEngine.UI.Text debugText;
 
 
-    // Start is called before the first frame update
-    /// <summary>
-    /// Awake is called when the script instance is being loaded.
-    /// </summary>
-    void Awake()
-    {
-        // ---------- Camera --------------
-        // 1280 x 720 : cameraOrthogonalInitialSize
-        float screenRatio = (float)Screen.width / (float)Screen.height;
-        float targetRatio = 720f / 1280f;
-        if (screenRatio >= targetRatio){
-            mainCam.orthographicSize = cameraOrthogonalInitialSize;
-        }
-        else{
-            float differenceInSize = targetRatio / screenRatio;
-            mainCam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
-        }
-    }
+    // ## Input ##
+    private bool touchOn = false;
+    private Touch tempTouchs;
 
     private void OnEnable()
     {
-        GameManager.Instance().onLoginFinish += OnGoogleLoginFinish;
-        GameManager.Instance().onSignout += OnSignOut;
+        //GameManager.Instance().onLoginFinish += OnGoogleLoginFinish;
+        //GameManager.Instance().onSignout += OnSignOut;
     }
 
     private void OnDisable()
     {
-        GameManager.Instance().onLoginFinish -= OnGoogleLoginFinish;
-        GameManager.Instance().onSignout -= OnSignOut;
+        //GameManager.Instance().onLoginFinish -= OnGoogleLoginFinish;
+        //GameManager.Instance().onSignout -= OnSignOut;
     }
     void Start()
     {
-        Btn_Logout.SetActive(false);
+        //Btn_Logout.SetActive(false);
 
         Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
         Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
         mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
 
-        floatingJoystick.onPointerDown += OnPointerDown;
+        //TopMostControl.Instance().GetController().onPointerDown += OnPointerDown;
 
         // Animating
         light1_intensityTween.TweenCompleted += () => {
@@ -117,6 +96,11 @@ public class MainMenuControl : MonoBehaviour
                 mainTitle_transformTween.Begin();
                 mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
 
+                Btn_Newgame.Begin();
+                Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+
+                Btn_Continue.Begin();
+                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
             }
         };
 
@@ -159,8 +143,39 @@ public class MainMenuControl : MonoBehaviour
             mainTitle.transform.localPosition = mainTitle_transformTween.transform.position;
         }
 
-#endregion
+        #endregion
 
+        #region # Input Control #
+
+#if UNITY_EDITOR
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (touchOn == false)
+            {
+                touchOn = true;
+                OnPointerDown();
+            }
+        }
+
+#else
+        if (Input.touchCount > 0)
+        {    
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                tempTouchs = Input.GetTouch(i);
+                if (tempTouchs.phase == TouchPhase.Began)
+                {
+                    if (touchOn == false) { 
+                        touchOn = true;
+                        OnPointerDown();
+                    }
+                    break;   
+                }
+            }
+        }
+#endif
+
+        #endregion
     }
 
     void OnPointerDown()
@@ -184,6 +199,12 @@ public class MainMenuControl : MonoBehaviour
                 mainTitle_transformTween.Begin();
                 mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
 
+                Btn_Newgame.Begin();
+                Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+
+                Btn_Continue.Begin();
+                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+
                 mainTitle_animatingStart = true;
             }
             else
@@ -204,75 +225,99 @@ public class MainMenuControl : MonoBehaviour
 
 
 #if UNITY_EDITOR
-    public void ClickGoogleLogin()
-    {
-        OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
-    }
+    //public void ClickGoogleLogin()
+    //{
+    //    OnPointerDown();
+    //    Btn_GoogleLogin.SetActive(false);
+    //    Btn_AnonymousPlay.SetActive(false);
+    //    OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
+    //}
 
-    public void ClickGoogleLogout()
-    {
-        OnSignOut();
-    }
+    //public void ClickGoogleLogout()
+    //{
+    //    //Btn_Logout.SetActive(false);
+    //
+    //    Btn_Newgame.Stop();
+    //    Btn_Continue.Stop();
+    //    Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+    //    Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+    //
+    //    OnSignOut();
+    //}
 
-    public void ClickWithoutLogin()
-    {
-        OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
-    }
+    //public void ClickWithoutLogin()
+    //{
+    //    OnPointerDown();
+    //    Btn_GoogleLogin.SetActive(false);
+    //    Btn_AnonymousPlay.SetActive(false);
+    //    OnGoogleLoginFinish(LOGIN_TYPE.ANONYMOUS);
+    //}
 #else
-    public void ClickGoogleLogin()
-    {
-        GameManager.Instance().OnClickGoogleLogin();
-    }
-
-    public void ClickGoogleLogout()
-    {
-        GameManager.Instance().OnClickGoogleLogout();
-    }
-
-    public void ClickWithoutLogin()
-    {
-        GameManager.Instance().SetAnonymousPlay();
-    }
+    //public void ClickGoogleLogin()
+    //{
+    //    OnPointerDown();
+    //    Btn_GoogleLogin.SetActive(false);
+    //    Btn_AnonymousPlay.SetActive(false);
+    //    GameManager.Instance().OnClickGoogleLogin();
+    //}
+    //
+    //public void ClickGoogleLogout()
+    //{
+    //    Btn_Logout.SetActive(false);
+    //    Btn_Newgame.Stop();
+    //    Btn_Continue.Stop();
+    //    Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+    //    Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+    //    GameManager.Instance().OnClickGoogleLogout();
+    //}
+    //
+    //public void ClickWithoutLogin()
+    //{
+    //    OnPointerDown();
+    //    Btn_GoogleLogin.SetActive(false);
+    //    Btn_AnonymousPlay.SetActive(false);
+    //    GameManager.Instance().SetAnonymousPlay();
+    //}
 #endif
 
-    void OnGoogleLoginFinish(GameStatics.LOGIN_TYPE loginType)
-    {
-        switch (loginType)
-        {
-            case LOGIN_TYPE.FAIL:
-                debugText.text = "Offline";
-                break;
-            case LOGIN_TYPE.ANONYMOUS:
-                debugText.text = "Guest";
-                break;
-            case LOGIN_TYPE.GOOGLE:
-                debugText.text = Social.localUser.userName;
-                break;
-            default:
-                break;
-        }
+    //void OnGoogleLoginFinish(GameStatics.LOGIN_TYPE loginType)
+    //{
+    //    switch (loginType)
+    //    {
+    //        case LOGIN_TYPE.FAIL:
+    //            debugText.text = "Offline";
+    //            Btn_GoogleLogin.SetActive(true);
+    //            Btn_AnonymousPlay.SetActive(true);
+    //            break;
+    //        case LOGIN_TYPE.ANONYMOUS:
+    //            debugText.text = "Guest";
+    //            Btn_Logout.SetActive(true);
+    //            break;
+    //        case LOGIN_TYPE.GOOGLE:
+    //            debugText.text = Social.localUser.userName;
+    //            Btn_Logout.SetActive(true);
+    //            break;
+    //        default:
+    //            break;
+    //    }
+    //
+    //
+    //    Btn_Newgame.Begin();
+    //    Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+    //
+    //    Btn_Continue.Begin();
+    //    Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+    //}
 
-
-        Btn_GoogleLogin.SetActive(false);
-        Btn_AnonymousPlay.SetActive(false);
-        Btn_Logout.SetActive(true);
-
-        Btn_Newgame.Begin();
-        Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
-
-        Btn_Continue.Begin();
-        Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
-    }
-
-    void OnSignOut()
-    {
-        Btn_GoogleLogin.SetActive(true);
-        Btn_AnonymousPlay.SetActive(true);
-        Btn_Logout.SetActive(false);
-
-        Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
-        Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
-
-        debugText.text = "Offline";
-    }
+    //void OnSignOut()
+    //{
+    //    Btn_GoogleLogin.SetActive(true);
+    //    Btn_AnonymousPlay.SetActive(true);
+    //    Btn_Logout.SetActive(false);
+    //
+    //    Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+    //    Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+    //
+    //    debugText.text = "Offline";
+    //}
 }

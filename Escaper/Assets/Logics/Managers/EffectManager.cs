@@ -57,6 +57,10 @@ public class EffectManager : MonoBehaviour
                     go_eff.transform.localPosition = targetPos;
                 }
             break;
+
+            case GameStatics.EFFECT.GET_SHARD:
+
+                break;
         }
     }
 

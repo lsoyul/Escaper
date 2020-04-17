@@ -9,9 +9,15 @@ public class TopMostControl : MonoBehaviour
 {
     public GameObject topMostBlackPanel;
     public TweenAlpha blackPanelAlpha;
+    public Canvas topCanvas;
+    public GameObject gameControlObj;
+
+    public Color joystick_backColor;
+    public Color joystick_centerColor;
 
     private SCENE_INDEX currentTargetScene;
     private bool isChangingState = false;
+
 
     private static GameObject container;
     private static TopMostControl instance;
@@ -38,6 +44,8 @@ public class TopMostControl : MonoBehaviour
         {
             instance = GetComponent<TopMostControl>();
             DontDestroyOnLoad(this);
+
+            gameControlObj.SetActive(false);
         }
         else
         {
@@ -61,6 +69,18 @@ public class TopMostControl : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+
+    #region #### Flick Controller ####
+
+    public FlickController flickController;
+
+    public FlickController GetController()
+    {
+        return flickController;
+    }
+
+    #endregion
+
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         isChangingState = false;
@@ -70,14 +90,22 @@ public class TopMostControl : MonoBehaviour
         blackPanelAlpha.value = blackPanelAlpha.startValue;
 
         if (scene.buildIndex == (int)SCENE_INDEX.GAMESTAGE)
+        {
             StageLoader.Instance().SetStage(StageLoader.NextStage);
+            gameControlObj.SetActive(true);
+            topCanvas.sortingOrder = 10;
+        }
         else
+        {
             StageLoader.Instance().DisableStage();
-        
+            gameControlObj.SetActive(false);
+            topCanvas.sortingOrder = 0;
+        }
     }
 
     public void StartChangeScene(SCENE_INDEX targetSceneIndex, bool smoothChange, int nextStageNum = 1)
     {
+        topCanvas.sortingOrder = 10;
         isChangingState = true;
         blackPanelAlpha.startValue = 0f;
         blackPanelAlpha.endValue = 1f;
@@ -109,6 +137,8 @@ public class TopMostControl : MonoBehaviour
     public TweenTransforms gameOverTweenTrans;
     public UnityEngine.UI.Text shardsAmountsToRevive;
 
+    public GameObject NoMoreRevivePanel;
+
     private float outXPos_gameOverUI = 900;
     private float inXPos_gameOverUI = 0;
 
@@ -116,8 +146,19 @@ public class TopMostControl : MonoBehaviour
 
     public void ShowGameOver(bool isShow)
     {
+        if (PlayerManager.Instance().PlayerStatus.RemainReviveCount > 0)
+        {
+            NoMoreRevivePanel.SetActive(false);
+        }
+        else
+        {
+            NoMoreRevivePanel.SetActive(true);
+        }
+
         if (isShow)
         {
+            gameControlObj.SetActive(false);
+
             int shardsAmounts = PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2;
             shardsAmountsToRevive.text = "-"+shardsAmounts.ToString();
             gameOverTweenTrans.startingVector.x = outXPos_gameOverUI;
@@ -125,6 +166,8 @@ public class TopMostControl : MonoBehaviour
         }
         else
         {
+            gameControlObj.SetActive(true);
+
             gameOverTweenTrans.startingVector.x = inXPos_gameOverUI;
             gameOverTweenTrans.endVector.x = outXPos_gameOverUI;
         }

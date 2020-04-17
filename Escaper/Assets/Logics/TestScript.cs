@@ -7,23 +7,21 @@ using UnityEngine.UI;
 
 public class TestScript : MonoBehaviour
 {
-    public Text sceneString;
-    public Text levelString;
+    public Text coolSkilllevelString;
+    public Text distanceSkillLevelString;
 
-    public void OnClickChangeScene()
+    public void OnClickMaxHP()
     {
-        int sceneNum = int.Parse(sceneString.text);
-
-        if (sceneNum >= 0 && sceneNum <= 3) TopMostControl.Instance().StartChangeScene((GameStatics.SCENE_INDEX)sceneNum, true);
+        PlayerManager.Instance().PlayerStatus.CurrentHP = PlayerManager.Instance().PlayerStatus.MaxHP;
     }
 
-    public void OnClickChangeLevel()
+    public void OnClickSkillCoolLevel()
     {
-        int levelNum = int.Parse(levelString.text);
+        GameConfigs.SetSkillLevel_DoubleJumpCooltime(int.Parse(coolSkilllevelString.text));
+    }
 
-        if (levelNum >= 0 && levelNum <= StageLoader.Instance().stageList.Count) 
-        {
-            StageLoader.Instance().SetStage(levelNum);
-        }
+    public void OnClickSkillDistanceLevel()
+    {
+        GameConfigs.SetSkillLevel_IncreaseShardsPullDistance(int.Parse(distanceSkillLevelString.text));
     }
 }

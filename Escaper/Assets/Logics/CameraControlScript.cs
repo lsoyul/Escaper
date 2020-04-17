@@ -7,7 +7,7 @@ using static GameStatics;
 public class CameraControlScript : MonoBehaviour {
 
     //public UnityEngine.UI.Text text;
-    public PlayerControllerScripts player;
+    private PlayerControllerScripts player;
     Transform cameraTransform;
     public FlickController flickController;
     Camera cam;
@@ -42,24 +42,31 @@ public class CameraControlScript : MonoBehaviour {
         PlayerManager.Instance().onDamaged -= OnDamaged;
     }
 
-	// Use this for initialization
-        void Start () {
+    private void Awake()
+    {
+        player = PlayerManager.Instance().GetPlayerControl();
+    }
+
+    // Use this for initialization
+    void Start () 
+    {
         cameraTransform = this.GetComponent<Transform>();
         cam = this.GetComponent<Camera>();
 
         // 1280 x 720 : cameraOrthogonalInitialSize
-        float screenRatio = (float)Screen.width / (float)Screen.height;
-        float targetRatio = 720f / 1280f;
-        if (screenRatio >= targetRatio){
-            cam.orthographicSize = cameraOrthogonalInitialSize;
-        }
-        else{
-            float differenceInSize = targetRatio / screenRatio;
-            cam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
-        }
+        //float screenRatio = (float)Screen.width / (float)Screen.height;
+        //float targetRatio = 720f / 1280f;
+        //if (screenRatio >= targetRatio){
+        //    cam.orthographicSize = cameraOrthogonalInitialSize;
+        //}
+        //else{
+        //    float differenceInSize = targetRatio / screenRatio;
+        //    cam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
+        //}
 
         targetPos = Vector3.zero;
-	}
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -106,8 +113,11 @@ public class CameraControlScript : MonoBehaviour {
         switch (damagedType)
         {
             case DAMAGED_TYPE.SPIKE:
-            CameraShake(3);
-            break;
+                CameraShake(3);
+                break;
+            case DAMAGED_TYPE.FALLING_GROUND:
+                CameraShake(5);
+                break;
         }
     }
 

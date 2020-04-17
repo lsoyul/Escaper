@@ -11,12 +11,22 @@ public class LightBlink : MonoBehaviour
 
     bool isFinish = false;
 
+    public float StartValue = -1f;
+    public float EndValue = -1f;
+
     public void StartBlink(float duration)
     {
         this.gameObject.SetActive(true);
         isFinish = false;
-        targetLight.intensity = tweenValue.startValue;
         tweenValue.Begin();
+
+        if (StartValue != -1 && EndValue != -1)
+        {
+            tweenValue.startValue = StartValue;
+            tweenValue.endValue = EndValue;
+        }
+
+        targetLight.intensity = tweenValue.startValue;
         StartCoroutine(Timer(duration));
     }
 
@@ -25,12 +35,20 @@ public class LightBlink : MonoBehaviour
         this.gameObject.SetActive(true);
         isFinish = false;
         tweenValue.myTweenType = TweenBase.playStyles.PingPong;
-        tweenValue.Begin();
+        tweenValue.Begin(); 
+        
+        if (StartValue != -1 && EndValue != -1)
+        {
+            tweenValue.startValue = StartValue;
+            tweenValue.endValue = EndValue;
+        }
+
         targetLight.intensity = tweenValue.startValue;
     }
 
     public void Hide()
     {
+        tweenValue.Reset();
         isFinish = true;
     }
 
@@ -43,6 +61,7 @@ public class LightBlink : MonoBehaviour
         if (isFinish)
         {
             tweenValue.Completed();
+            tweenValue.Reset();
             this.gameObject.SetActive(false);
         }
     }

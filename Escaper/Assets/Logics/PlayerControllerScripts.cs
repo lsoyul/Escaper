@@ -17,13 +17,14 @@ public class PlayerControllerScripts : MonoBehaviour
     private int possibleMaxJump = 2;
     [SerializeField] private int currentRemainJump = 2;
 
-    public float minimumYSpeed = -300f;
+    public float minimumYSpeed = -500f;
 
     public Animator playerAnimator;
     public float characterScale;
 
     [Header("- Effects -")]
     public Animator glintAnimation;
+    public LightBlink shardLight;
 
     // Ground Check
     [SerializeField] bool isGround = false;
@@ -38,6 +39,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
     [Header("- Player Hurting Status -")]
     public bool canTriggerHurt = true;
+    public bool reviveTime = false;
     public float unbeatableDuration_hurt = 3.0f;
     public float unbeatableDuration_revive = 5.0f;
     private bool isHurting = false;
@@ -46,9 +48,14 @@ public class PlayerControllerScripts : MonoBehaviour
     public LightBlink damagedLight;
     public LightBlink reviveLight;
 
+    // Falling State
+    public bool isFalling = false;
+    public bool isFainting = false;
+
 
     [Header("- Player AirJump Effect -")]
     public LightBlink airJumpLight;
+    public GameObject skillCooltime;
 
     [Header("- ForTest -")]
     public Transform initPos;
@@ -56,16 +63,17 @@ public class PlayerControllerScripts : MonoBehaviour
     private void Awake() {
         if (flickController == null)
         {
+            flickController = TopMostControl.Instance().GetController();
             Debug.LogError("FlickController is null");
         }
 
         characterScale = playerAnimator.transform.localScale.x;
-        
 
         flickController.onPointerUp += OnPointerUp;
         flickController.onPointerDown += OnPointerDown;
 
         PlayerManager.Instance().onDeath += OnDeath;
+        PlayerManager.Instance().onFinishDoubleJumpCooltime += OnFinishDoubleJumpCooltime;
 
         initFixedDeltaTime = Time.fixedDeltaTime;
 
@@ -82,6 +90,7 @@ public class PlayerControllerScripts : MonoBehaviour
         if (PlayerManager.HasInstance())
         {
             PlayerManager.Instance().onDeath -= OnDeath;
+            PlayerManager.Instance().onFinishDoubleJumpCooltime -= OnFinishDoubleJumpCooltime;
         }
     }
 
@@ -94,34 +103,36 @@ public class PlayerControllerScripts : MonoBehaviour
 
         isGround = CheckGround();
 
+        // Touch Control
         if (flickController.GetIsHolding() && currentRemainJump > 0)
         {
-            Vector2 endPos = playerRigidbody2D.transform.position;
-            endPos.x -= flickController.GetFlickedVector().x;
-            endPos.y -= flickController.GetFlickedVector().y;
-
-            Debug.DrawLine(playerRigidbody2D.transform.position, endPos, Color.yellow);
-
-            if (flickController.GetFlickedVector().y < 0 && isGround == true)
+            if (!isFalling && !isFainting && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup"))
             {
-                // Finger Flick to down at ground (ready to jump upside)
-                jumpGuide.SetActive(true);
-            }
-            else if (isGround == false)
-            {
-                // When, ready to air jump in air
-                jumpGuide.SetActive(true);
-            }
-            else
-            {
-                jumpGuide.SetActive(false);
-            }
+                Vector2 endPos = playerRigidbody2D.transform.position;
+                endPos.x -= flickController.GetFlickedVector().x;
+                endPos.y -= flickController.GetFlickedVector().y;
 
-            Vector3 vec = playerRigidbody2D.position + -flickController.GetFlickedVector() * 0.3f;
-            vec.z = -1f;
-            jumpGuide.transform.position = vec;
+                Debug.DrawLine(playerRigidbody2D.transform.position, endPos, Color.yellow);
 
-            //if (isGround == false) Eff_jumpCharge.SetActive(true);
+                if (flickController.GetFlickedVector().y < 0 && isGround == true)
+                {
+                    // Finger Flick to down at ground (ready to jump upside)
+                    jumpGuide.SetActive(true);
+                }
+                else if (isGround == false)
+                {
+                    // When, ready to air jump in air
+                    jumpGuide.SetActive(true);
+                }
+                else
+                {
+                    jumpGuide.SetActive(false);
+                }
+
+                Vector3 vec = playerRigidbody2D.position + -flickController.GetFlickedVector() * 0.3f;
+                vec.z = -1f;
+                jumpGuide.transform.position = vec;
+            }
         }
         else
         {
@@ -131,23 +142,36 @@ public class PlayerControllerScripts : MonoBehaviour
 
         if (playerRigidbody2D.velocity.y < minimumYSpeed)
         {
+            // FAlling state
             Vector2 t = playerRigidbody2D.velocity;
             t.y = minimumYSpeed;
             playerRigidbody2D.velocity = t;
+
+            isFalling = true;
         }
 
         ControlGroundCollide();
 
         UpdateAnimator();
 
-        CheckFall();
-
+        // Grounded Just Timing Callback
         if (beforeGround == false)
         {
             if (isGround == true)
             {
+                if (isFalling)
+                {
+                    damagedLight.StartBlink(1.0f);
+                    PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
+
+                    Vibration.Vibrate(5);
+                    isFainting = true;
+                    isFalling = false;
+                }
+
                 PlayerManager.Instance().OnGround();
             }
+
         }
     }
 
@@ -157,16 +181,18 @@ public class PlayerControllerScripts : MonoBehaviour
     {
         if (flickController.GetFlickedVector().magnitude > 1f && currentRemainJump > 0)
         {
-
-            if (isGround == false) 
+            if (isGround == false && !PlayerManager.Instance().GetIsDoubleJumpCooltime()) 
             {
                 // Air Jump!
+                // ## Skill ##
+                PlayerManager.Instance().Skill_DoubleJump();
+                // ####################
+
                 playerRigidbody2D.velocity = Vector2.zero;
                 playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
 
                 isAirJump = true;
                 Vibration.Vibrate(1);
-
 
                 if (flickController.GetFlickedVector().magnitude >= 100f)
                     {
@@ -177,10 +203,10 @@ public class PlayerControllerScripts : MonoBehaviour
                         EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_TWICE, flickController.GetFlickedVector(), xReverse, this.transform);
                     }
             }
-            else
+            else if (isGround == true)
             {
                 // Ground Jump!
-                if (flickController.GetFlickedVector().y < 0)
+                if (flickController.GetFlickedVector().y < 0 && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup"))
                 {
                     playerRigidbody2D.velocity = Vector2.zero;
                     playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
@@ -210,15 +236,26 @@ public class PlayerControllerScripts : MonoBehaviour
 
     void OnPointerDown()
     {
-        if (currentRemainJump > 0 && isGround == false && isHurting == false)
+        if (!isFalling && !isFainting)
         {
-            timescale = slowDownTimescale;
-            Vibration.Vibrate(3);
-            playerRenderer.material.color = Color.yellow;
-            //playerRenderer.material = dicPlayerMats["PlayerAdditiveMat"];
-            glintAnimation.SetTrigger("Trigger");
+            if (currentRemainJump > 0 && isGround == false && isHurting == false && !PlayerManager.Instance().GetIsDoubleJumpCooltime())
+            {
+                timescale = slowDownTimescale;
+                Vibration.Vibrate(3);
+                playerRenderer.material.color = Color.yellow;
+                //playerRenderer.material = dicPlayerMats["PlayerAdditiveMat"];
+                glintAnimation.SetTrigger("Trigger");
 
-            airJumpLight.StartBlink();
+                airJumpLight.StartBlink();
+            }
+        }
+        else
+        {
+            if (isFainting && !isFalling)
+            {
+                // Fainting on the ground
+                isFainting = false;
+            }
         }
     }
 
@@ -263,6 +300,8 @@ public class PlayerControllerScripts : MonoBehaviour
         playerAnimator.SetBool("isAirJump", isAirJump);
         playerAnimator.SetBool("isHurting", isHurting);
         playerAnimator.SetBool("isDead", PlayerManager.Instance().IsDead);
+        playerAnimator.SetBool("isFalling", isFalling);
+        playerAnimator.SetBool("isFainting", isFainting);
 
         glintAnimation.speed = 1f / Time.timeScale;
 
@@ -291,6 +330,20 @@ public class PlayerControllerScripts : MonoBehaviour
 
             playerAnimator.transform.localScale = tVec;
         }
+
+        // DoubleJump Cooltime
+        if (PlayerManager.Instance().GetIsDoubleJumpCooltime())
+        {
+            skillCooltime.SetActive(true);
+            Vector3 progressVector = skillCooltime.transform.localScale;
+            double scaleX = 1f - (PlayerManager.Instance().GetDoubleJumpTimer() / PlayerManager.Instance().PlayerStatus.DoubleJumpCooltime);
+            progressVector.x = (float)scaleX * 4f;
+            skillCooltime.transform.localScale = progressVector;
+        }
+        else
+        {
+            skillCooltime.SetActive(false);
+        }
     }   
 
     void ControlGroundCollide()
@@ -301,11 +354,14 @@ public class PlayerControllerScripts : MonoBehaviour
             {
                 this.transform.parent = groundCollideObject.transform;
             }
-            else this.transform.parent = null;
+            else this.transform.parent = PlayerManager.Instance().transform;
         }
         else
         {
-            if (this.transform.parent != null) this.transform.parent = null;
+            if (this.transform.parent != PlayerManager.Instance().transform)
+            {
+                this.transform.parent = PlayerManager.Instance().transform;
+            }
         }
     }
 
@@ -314,13 +370,6 @@ public class PlayerControllerScripts : MonoBehaviour
         return jumpGuide;
     }
 
-    void CheckFall()
-    {
-        if (this.transform.position.y < -200f)
-        {
-            playerRigidbody2D.position = initPos.position;
-        }
-    }
 
     void OnTriggerStay2D(Collider2D collider)
     {
@@ -331,7 +380,7 @@ public class PlayerControllerScripts : MonoBehaviour
             switch(collider.tag)
             {
                 case "Damage_spike":{
-                    if (canTriggerHurt)
+                    if (canTriggerHurt && !reviveTime)
                     {
                         //Debug.Log("Damage_spike");
                         //Debug.Log("---------------------Hit!");
@@ -381,7 +430,7 @@ public class PlayerControllerScripts : MonoBehaviour
     {
         reviveLight.StartBlink(unbeatableDuration);
         float timer = 0f;
-        canTriggerHurt = false;
+        reviveTime = true;
         isHurting = false;
         timescale = 1.0f;
 
@@ -393,9 +442,14 @@ public class PlayerControllerScripts : MonoBehaviour
             yield return null;
         }
 
-        canTriggerHurt = true;
+        reviveTime = false;
 
         yield break;
+    }
+
+    void OnFinishDoubleJumpCooltime()
+    {
+        airJumpLight.StartBlink(0.7f);
     }
 
     void OnDeath(bool isDead)
@@ -403,8 +457,19 @@ public class PlayerControllerScripts : MonoBehaviour
         if (isDead == false)
         {
             // Revive!
+            isFainting = false;
             StartCoroutine(TriggerOverWhelming(this.unbeatableDuration_revive));
         }
+    }
+
+    public Rigidbody2D GetPlayerRigidBody()
+    {
+        return playerRigidbody2D;
+    }
+
+    public void BlinkPlayerShardLight()
+    {
+        shardLight.StartBlink(0.5f);
     }
 
     #region TEST

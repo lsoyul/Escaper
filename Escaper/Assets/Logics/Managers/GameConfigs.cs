@@ -9,7 +9,7 @@ public class GameConfigs
     private static int maxProgressStage = 0;
     private static int skillLevel_MaxHP = 0;
     private static int skillLevel_DoubleJumpCooltime = 0;
-    private static int skillLevel_AirTimeDuration = 0;
+    private static int skillLevel_IncreaseShardsPullDistance = 0;
     private static int currentMemoryShards = 0;
 
     #endregion
@@ -30,9 +30,9 @@ public class GameConfigs
         get { return skillLevel_DoubleJumpCooltime; }
     }
 
-    public static int SkillLevel_AirTimeDuration
+    public static int SkillLevel_IncreaseShardsPullDistance
     {
-        get { return skillLevel_AirTimeDuration; }
+        get { return skillLevel_IncreaseShardsPullDistance; }
     }
 
     public static int CurrentMemoryShards
@@ -47,7 +47,7 @@ public class GameConfigs
         maxProgressStage = PlayerPrefs.GetInt(GameStatics.PREFS_MaxProgressStage, 0);
         skillLevel_MaxHP = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_MaxHP, 0);
         skillLevel_DoubleJumpCooltime = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_DoubleJumpCooltime, 0);
-        skillLevel_AirTimeDuration = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_AirTimeDuration, 0);
+        skillLevel_IncreaseShardsPullDistance = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_IncreaseShardsPullDistance, 0);
         currentMemoryShards = PlayerPrefs.GetInt(GameStatics.PREFS_CurrentMemoryShards, 0);
     }
 
@@ -56,13 +56,13 @@ public class GameConfigs
         maxProgressStage = 0;
         skillLevel_MaxHP = 0;
         skillLevel_DoubleJumpCooltime = 0;
-        skillLevel_AirTimeDuration = 0;
+        skillLevel_IncreaseShardsPullDistance = 0;
         currentMemoryShards = 0;
 
         PlayerPrefs.SetInt(GameStatics.PREFS_MaxProgressStage, maxProgressStage);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_MaxHP, skillLevel_MaxHP);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_DoubleJumpCooltime, skillLevel_DoubleJumpCooltime);
-        PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_AirTimeDuration, skillLevel_AirTimeDuration);
+        PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_IncreaseShardsPullDistance, skillLevel_IncreaseShardsPullDistance);
         PlayerPrefs.SetInt(GameStatics.PREFS_CurrentMemoryShards, currentMemoryShards);
     }
 
@@ -85,10 +85,10 @@ public class GameConfigs
         skillLevel_DoubleJumpCooltime = level;
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_DoubleJumpCooltime, skillLevel_DoubleJumpCooltime);
     }
-    public static void SetSkillLevel_AirTimeDuration(int level)
+    public static void SetSkillLevel_IncreaseShardsPullDistance(int level)
     {
-        skillLevel_AirTimeDuration = level;
-        PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_AirTimeDuration, skillLevel_AirTimeDuration);
+        skillLevel_IncreaseShardsPullDistance = level;
+        PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_IncreaseShardsPullDistance, skillLevel_IncreaseShardsPullDistance);
     }
 
     public static void SetCurrentMemoryShards(int memoryShardsAmount)

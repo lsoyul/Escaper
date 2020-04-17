@@ -8,7 +8,6 @@ public class PlayerStatus
 {
 	private int maxHP;
 	private double doubleJumpCooltime;
-	private double airtimeDuartion;
 
 	private int currentMemoryShards;
 
@@ -31,7 +30,6 @@ public class PlayerStatus
 		get { return remainReviveCount; }
 		set { 
 			remainReviveCount = value;
-			if (onChangePlayerStatus != null) onChangePlayerStatus();
 		}
 	}
 
@@ -44,15 +42,6 @@ public class PlayerStatus
 			currentHP = value;
 			if (currentHP <= 0) currentHP = 0;
 			if (onChangePlayerStatus != null) onChangePlayerStatus();
-		}
-	}
-
-
-	public double AirtimeDuration
-	{
-		get {
-			airtimeDuartion = GameStatics.default_AirtimeDuration + (GameStatics.default_IncAirTimeDuration * GameConfigs.SkillLevel_AirTimeDuration);
-			return airtimeDuartion; 
 		}
 	}
 

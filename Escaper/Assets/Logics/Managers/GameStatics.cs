@@ -10,13 +10,13 @@ public static class GameStatics
 
     public const int default_IncHP = 5;
     public const double default_IncDoublejumpCooltime = -0.1f;
-    public const double default_IncAirTimeDuration = 0.2f;
+    public const double default_IncShardsPullDistance = 1f;
     public const int default_BaseMaxHP = 40;
-    public const double default_DoubleJumpCooltime = 5.0f;
-    public const double default_AirtimeDuration = 1.0f;
+    public const double default_DoubleJumpCooltime = 3f;
+    public const double default_ShardsPullDistance = 10.0f;
     public const int default_IncMemoryShards = 10;
     // Ads sale ratio
-    public const double default_SaleBonusRatio = 0.8f;
+    public const double default_MultiflyRatio = 1.5f;
     public const int default_MaxReviceCount = 1;
 
     #endregion
@@ -50,27 +50,49 @@ public static class GameStatics
     public enum EFFECT
     {
         JUMP_SMOKE,
-        JUMP_TWICE
+        JUMP_TWICE,
+        GET_SHARD
     }
 
     public enum DAMAGED_TYPE
     {
         SPIKE,
-        
+        FALLING_GROUND
+    }
+
+    public enum SHARD_TYPE
+    {
+        SHARD1,
+        SHARD2
+    }
+
+    public enum SHARD_MODE
+    {
+        STAGE1,
+        STAGE2,
+        STAGE3
     }
 
     public static float Angle(Vector2 p_vector2)
-     {
-         if (p_vector2.x < 0)
-         {
-             return 360 - (Mathf.Atan2(p_vector2.x, p_vector2.y) * Mathf.Rad2Deg * -1);
-         }
-         else
-         {
-             return Mathf.Atan2(p_vector2.x, p_vector2.y) * Mathf.Rad2Deg;
-         }
-     }
+    {
+        if (p_vector2.x < 0)
+        {
+            return 360 - (Mathf.Atan2(p_vector2.x, p_vector2.y) * Mathf.Rad2Deg * -1);
+        }
+        else
+        {
+            return Mathf.Atan2(p_vector2.x, p_vector2.y) * Mathf.Rad2Deg;
+        }
+    }
 
+    #region #### Shards variables ####
+
+    public const int Shard1_min = 7;
+    public const int Shard1_max = 14;
+    public const int Shard2_min = 80;
+    public const int Shard2_max = 101;
+
+    #endregion
 
     #region #### Menus ####
 
@@ -87,11 +109,14 @@ public static class GameStatics
     #region #### Damage Points ####
 
     public const int DMG_SPIKE_BASIC = 20;
+    public const int DMG_FALLING = 50;
 
     #endregion
 
 
     #region #### Log Events ####
+
+    public const string EVENT_START_GAME = "E_StartGame";
 
     public const string EVENT_LOGIN_ANONYMOUS = "E_Signin_Anony";
     public const string EVENT_LOGIN_GOOGLE = "E_Login_Google";
@@ -104,7 +129,7 @@ public static class GameStatics
     public const string PREFS_MaxProgressStage = "PREFS_MaxProgressStage";
     public const string PREFS_SkillLevel_MaxHP = "PREFS_SkillLevel_MaxHP";
     public const string PREFS_SkillLevel_DoubleJumpCooltime = "PREFS_SkillLevel_DoubleJumpCooltime";
-    public const string PREFS_SkillLevel_AirTimeDuration = "PREFS_SkillLevel_AirTimeDuration";
+    public const string PREFS_SkillLevel_IncreaseShardsPullDistance = "PREFS_SkillLevel_IncreaseShardsPullDistance";
     public const string PREFS_CurrentMemoryShards = "PREFS_CurrentMemoryShards";
 
 

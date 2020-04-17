@@ -28,7 +28,37 @@ public class PlayerManager : MonoBehaviour
 
     #region ### Player ###
 
+    public PlayerControllerScripts playerController;
     private PlayerStatus playerStatus = new PlayerStatus();
+
+
+    public PlayerControllerScripts GetPlayerControl()
+    {
+        return this.playerController;
+    }
+
+    public void SetPlayerController(bool active, bool isRightInit = true)
+    {
+        if (playerController.transform.parent != this.transform)
+        {
+            playerController.transform.parent = this.transform;
+        }
+
+        playerController.gameObject.SetActive(active);
+
+        if (active)
+        {
+            playerController.transform.position = StageLoader.Instance().GetCurrentStage().GetPlayerInitPos().position;
+
+            Vector3 tVec = playerController.playerAnimator.transform.localScale;
+            if ((isRightInit && tVec.x < 0)
+                || (!isRightInit && tVec.x > 0))
+            {
+                tVec.x *= -1;
+                playerController.playerAnimator.transform.localScale = tVec;
+            }
+        }
+    }
 
     public PlayerStatus PlayerStatus
     {
@@ -53,6 +83,8 @@ public class PlayerManager : MonoBehaviour
     public Action onChangePlayerStatus;
     public Action<bool> onDeath;
 
+    public Action onFinishDoubleJumpCooltime;
+
     private void Awake()
     {
         if(instance == null)
@@ -64,6 +96,8 @@ public class PlayerManager : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
+        SetPlayerController(false);
 
         if (playerStatus == null) playerStatus = new PlayerStatus();
 
@@ -118,6 +152,9 @@ public class PlayerManager : MonoBehaviour
             case DAMAGED_TYPE.SPIKE:
                 playerStatus.CurrentHP -= GameStatics.DMG_SPIKE_BASIC;
                 break;
+            case DAMAGED_TYPE.FALLING_GROUND:
+                playerStatus.CurrentHP -= GameStatics.DMG_FALLING;
+                break;
             default:
                 break;
         }
@@ -154,16 +191,83 @@ public class PlayerManager : MonoBehaviour
                 TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMESTAGE, true, StageLoader.CurrentStage);
                 break;
             case MENU_GAMEOVER.REVIVE_SHARDS:
-                PlayerStatus.CurrentMemoryShards = PlayerStatus.CurrentMemoryShards / 2;
-                PlayerStatus.CurrentHP = PlayerStatus.MaxHP / 2;
-                TopMostControl.Instance().ShowGameOver(false);
+
+                if (PlayerStatus.RemainReviveCount > 0)
+                {
+                    PlayerStatus.CurrentMemoryShards = PlayerStatus.CurrentMemoryShards / 2;
+                    PlayerStatus.CurrentHP = PlayerStatus.MaxHP / 2;
+                    TopMostControl.Instance().ShowGameOver(false);
+                    PlayerStatus.RemainReviveCount -= 1;
+                }
                 break;
             case MENU_GAMEOVER.REVIVE_AD:
-                PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
-                TopMostControl.Instance().ShowGameOver(false);
+                if (PlayerStatus.RemainReviveCount > 0)
+                {
+                    PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
+                    TopMostControl.Instance().ShowGameOver(false);
+                    PlayerStatus.RemainReviveCount -= 1;
+                }
                 break;
             default:
                 break;
         }
     }
+
+    #region ### Shard get callback ###
+
+
+    public void OnGetShard(SHARD_TYPE shardType)
+    {
+        PlayerStatus.CurrentMemoryShards +=
+            (int)(StageLoader.Instance().GetRandomShard(shardType) * StageLoader.Instance().GetShardMultifly());
+
+        PlayerManager.Instance().GetPlayerControl().BlinkPlayerShardLight();
+    }
+
+    #endregion
+
+    #region ### Skill Controls ###
+
+
+    private double doubleJumpTimer = 0f;
+    private bool isDoubleJumpCooltime = false;
+
+    IEnumerator DoubleJump()
+    {
+        isDoubleJumpCooltime = true;
+        doubleJumpTimer = 0f;
+
+        while (doubleJumpTimer < PlayerStatus.DoubleJumpCooltime)
+        {
+            doubleJumpTimer += Time.deltaTime;
+            Debug.Log("## DoubleJump : " + doubleJumpTimer + " / " + PlayerStatus.DoubleJumpCooltime);
+            yield return null;
+        }
+
+        doubleJumpTimer = PlayerStatus.DoubleJumpCooltime;
+
+        isDoubleJumpCooltime = false;
+
+        if (onFinishDoubleJumpCooltime != null) onFinishDoubleJumpCooltime();
+    }
+
+    public void Skill_DoubleJump()
+    {
+        StartCoroutine(DoubleJump());
+    }
+
+    public bool GetIsDoubleJumpCooltime()
+    {
+        return isDoubleJumpCooltime;
+    }
+
+    public double GetDoubleJumpTimer()
+    {
+        return doubleJumpTimer;
+    }
+
+    #endregion
+
+
+
 }
