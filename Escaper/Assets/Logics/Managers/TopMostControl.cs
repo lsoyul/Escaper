@@ -92,6 +92,7 @@ public class TopMostControl : MonoBehaviour
         isChangingState = false;
         blackPanelAlpha.startValue = 1f;
         blackPanelAlpha.endValue = 0f;
+        blackPanelAlpha.TweenCompleted += SceneFadeinFinishEvent;
         blackPanelAlpha.Begin();
         blackPanelAlpha.value = blackPanelAlpha.startValue;
 
@@ -190,6 +191,17 @@ public class TopMostControl : MonoBehaviour
             blackPanelAlpha.TweenCompleted -= SceneFadeoutFinishEvent;
 
             if (onFinishSceneFadeout != null) onFinishSceneFadeout();
+        }
+    }
+
+    void SceneFadeinFinishEvent()
+    {
+        blackPanelAlpha.TweenCompleted -= SceneFadeinFinishEvent;
+
+        if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.GAMESTAGE)
+        {
+            // Show SubTitle
+            ShowSubTitle(StageLoader.CurrentStage);
         }
     }
 
@@ -446,6 +458,30 @@ public class TopMostControl : MonoBehaviour
         isGlobalLighting = false;
     }
 
+    #region #### SubTitle Control ####
+
+    public GameObject[] SubTitles;
+
+    public void ShowSubTitle(int stage)
+    {
+        if (SubTitles.Length < stage) return;
+
+        int targetIndex = stage - 1;
+        for (int i = 0; i < SubTitles.Length; i++)
+        {
+            if (i == targetIndex)
+            {
+                SubTitles[i].SetActive(true);
+                GameObject go = SubTitles[i];
+
+                go.GetComponent<TweenTransforms>().Begin();
+                go.GetComponent<TweenAlpha>().Begin();
+            }
+            else SubTitles[i].SetActive(false);
+        }
+    }
+
+    #endregion
 
     [Header("- TEST -")]
     public TestScript testscript;

@@ -223,7 +223,7 @@ public class PlayerControllerScripts : MonoBehaviour
                     SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_doubleJump], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_doubleJump].clip);
                 }
             }
-            else if (isGround == true)
+            else if (isGround == true && isFainting == false)
             {
                 // Ground Jump!
                 if (flickController.GetFlickedVector().y < 0 && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup"))
