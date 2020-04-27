@@ -14,7 +14,7 @@ public class LightBlink : MonoBehaviour
     public float StartValue = -1f;
     public float EndValue = -1f;
 
-    public void StartBlink(float duration)
+    public void StartBlink(float duration, Color targetColor)
     {
         this.gameObject.SetActive(true);
         isFinish = false;
@@ -27,6 +27,7 @@ public class LightBlink : MonoBehaviour
         }
 
         targetLight.intensity = tweenValue.startValue;
+        targetLight.color = targetColor;
         StartCoroutine(Timer(duration));
     }
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 
 using static GameStatics;
 
@@ -12,11 +13,14 @@ public class CameraControlScript : MonoBehaviour {
     public FlickController flickController;
     Camera cam;
 
+    [Header("- Global Light -")]
+    public Light2D globalLight;
+
     [Header("- Camera Shake -")]
     
     public TweenTransforms tweener;
-    bool isShaking = false;
-    int cameraShakeRemainCount = 0;
+
+    public bool IsShakingCamera;
 
     private Vector3 targetPos = new Vector3();
 
@@ -26,12 +30,16 @@ public class CameraControlScript : MonoBehaviour {
     public float levelMinXAxis = -50f;
     public float levelMaxXAxis = 110f;
 
+
+    private float UpgradeUIYOffset = 110f;
+
     /// <summary>
     /// This function is called when the object becomes enabled and active.
     /// </summary>
     void OnEnable()
     {
         PlayerManager.Instance().onDamaged += OnDamaged;
+        TopMostControl.Instance().onCameraShake += CameraShake_Rot;
     }
 
     /// <summary>
@@ -39,12 +47,22 @@ public class CameraControlScript : MonoBehaviour {
     /// </summary>
     void OnDisable()
     {
-        PlayerManager.Instance().onDamaged -= OnDamaged;
+        if (PlayerManager.HasInstance())
+        {
+            PlayerManager.Instance().onDamaged -= OnDamaged;
+        }
+
+        if (TopMostControl.HasInstance())
+        {
+            TopMostControl.Instance().onCameraShake -= CameraShake_Rot;
+        }
     }
 
     private void Awake()
     {
         player = PlayerManager.Instance().GetPlayerControl();
+
+        PlayerManager.Instance().SetCameraController(this);
     }
 
     // Use this for initialization
@@ -53,51 +71,46 @@ public class CameraControlScript : MonoBehaviour {
         cameraTransform = this.GetComponent<Transform>();
         cam = this.GetComponent<Camera>();
 
-        // 1280 x 720 : cameraOrthogonalInitialSize
-        //float screenRatio = (float)Screen.width / (float)Screen.height;
-        //float targetRatio = 720f / 1280f;
-        //if (screenRatio >= targetRatio){
-        //    cam.orthographicSize = cameraOrthogonalInitialSize;
-        //}
-        //else{
-        //    float differenceInSize = targetRatio / screenRatio;
-        //    cam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
-        //}
+        // 9 x 16
+        // 1400 x 800 : cameraOrthogonalInitialSize
+        float screenRatio = (float)Screen.width / (float)Screen.height;
+        float targetRatio = 9f / 16f;
+        if (screenRatio >= targetRatio){
+            cam.orthographicSize = cameraOrthogonalInitialSize;
+        }
+        else{
+            float differenceInSize = targetRatio / screenRatio;
+            cam.orthographicSize = cameraOrthogonalInitialSize * differenceInSize;
+        }
 
         targetPos = Vector3.zero;
 
     }
-	
-	// Update is called once per frame
-	void Update () {
 
-                //float targetCamOrthogonalSize = cameraOrthogonalInitialSize;
-                
-                //if (flickController.GetIsHolding() == true)
-                //    targetCamOrthogonalSize = cameraOrthogonalInitialSize + flickController.GetFlickedVector().magnitude * 0.1f;
-                //cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetCamOrthogonalSize, 0.2f);
-            
-                //text.text = cam.orthographicSize.ToString();
+    // Update is called once per frame
+    void Update()
+    {
+        targetPos = player.transform.position;
 
-                targetPos = player.transform.position;
-                //targetPos.x = 0f;
+        if (targetPos.y < GameStatics.GetCameraMinimumYAxis(StageLoader.CurrentStage)) targetPos.y = GetCameraMinimumYAxis(StageLoader.CurrentStage);
+        if (camFixedXAxis)
+        {
+            if (targetPos.x < levelMinXAxis) targetPos.x = levelMinXAxis;
+            if (targetPos.x > levelMaxXAxis) targetPos.x = levelMaxXAxis;
+        }
 
-                //if (flickController.GetIsHolding() == true && camFixedXAxis == false)
-                //{
-                //    targetPos.x = player.position.x + flickController.GetFlickedVector().x * -0.1f;
-                //    targetPos.y = player.position.y + flickController.GetFlickedVector().y * -0.1f;
-                //}
+        // Check Upgrade Status
+        if (TopMostControl.Instance().GetGameUIStatus() == TOPUI_STATUS.GAMEOVER)
+        {
+            targetPos.y = player.transform.position.y + UpgradeUIYOffset;
+        }
 
-                if (targetPos.y < 0f) targetPos.y = 0f;
-                if (camFixedXAxis) 
-                {
-                    if (targetPos.x < levelMinXAxis) targetPos.x = levelMinXAxis;
-                    if (targetPos.x > levelMaxXAxis) targetPos.x = levelMaxXAxis;
-                }
-                
-                cameraTransform.position = Vector2.Lerp(cameraTransform.position, targetPos, 0.2f);
-                cameraTransform.position = new Vector3(cameraTransform.position.x, cameraTransform.position.y, -10f);
-	}
+        if (IsShakingCamera == false)
+        {
+            cameraTransform.position = Vector2.Lerp(cameraTransform.position, targetPos, 0.2f);
+            cameraTransform.position = new Vector3(cameraTransform.position.x, cameraTransform.position.y, -10f);
+        }
+    }
 
     public void ChangeCameraMode()
     {
@@ -113,47 +126,80 @@ public class CameraControlScript : MonoBehaviour {
         switch (damagedType)
         {
             case DAMAGED_TYPE.SPIKE:
-                CameraShake(3);
+                Vibration.Vibrate(3);
+                CameraShake_Rot(2);
                 break;
             case DAMAGED_TYPE.FALLING_GROUND:
-                CameraShake(5);
+                Vibration.Vibrate(5);
+                CameraShake_Rot(5);
                 break;
         }
     }
 
-    public void CameraShake(int count)
+    public void SetGlobalLightIntensity(float intensity)
     {
-        if (isShaking == false)
-        {
-            Vibration.Vibrate(2);
-            cameraShakeRemainCount = count;
-            isShaking = true;
+        globalLight.intensity = intensity;
+    }
 
-            cameraShakeRemainCount--;
+    public void CameraShake_Rot(int count)
+    {
+        if (IsShakingCamera == false)
+            StartCoroutine(ShakeCamera(count));
+    }
+
+    IEnumerator ShakeCamera(int count)
+    {
+        IsShakingCamera = true;
+        int currentCount = 0;
+
+        while (currentCount < count)
+        {
+            currentCount++;
+
+            tweener.startingVector = new Vector3(0, 0, -1);
+            tweener.endVector = new Vector3(0, 0, 1);
             tweener.Begin();
-            tweener.transform.localPosition = tweener.startingVector;
-            tweener.TweenCompleted += shakeCompleteEvent;
+            tweener.vector3Results = Vector3.zero;
+            yield return new WaitForSeconds(tweener.duration);
         }
+
+        // End Shake
+
+        tweener.endVector = Vector3.zero;
+        tweener.Stop();
+        IsShakingCamera = false;
+        //tweener.vector3Results = Vector3.zero;
+        //tweener.transform.rotation = Vector3.zero;
     }
 
-    void shakeCompleteEvent()
-    {
-        //Debug.Log("TweenComplete!");
-        if (cameraShakeRemainCount > 0)
-        {
-            //Debug.Log("reset tween");
-            cameraShakeRemainCount--;
-            tweener.Reset();
-            tweener.transform.localPosition = tweener.startingVector;
-
-            if (cameraShakeRemainCount <= 0) 
-            {
-                //Debug.Log("shake finish");
-                cameraShakeRemainCount = 0;
-                isShaking = false;
-
-                tweener.TweenCompleted -= shakeCompleteEvent;
-            }
-        }   
-    }
+    //public void CameraShake(int count)
+    //{
+    //        //Vibration.Vibrate(2);
+    //    cameraShakeRemainCount = count;
+    //
+    //    cameraShakeRemainCount--;
+    //    tweener.Begin();
+    //    tweener.transform.localPosition = tweener.startingVector;
+    //    tweener.TweenCompleted += shakeCompleteEvent;
+    //}
+    //
+    //void shakeCompleteEvent()
+    //{
+    //    //Debug.Log("TweenComplete!");
+    //    if (cameraShakeRemainCount > 0)
+    //    {
+    //        //Debug.Log("reset tween");
+    //        cameraShakeRemainCount--;
+    //        tweener.Reset();
+    //        tweener.transform.localPosition = tweener.startingVector;
+    //
+    //        if (cameraShakeRemainCount <= 0) 
+    //        {
+    //            //Debug.Log("shake finish");
+    //            cameraShakeRemainCount = 0;
+    //
+    //            tweener.TweenCompleted -= shakeCompleteEvent;
+    //        }
+    //    }   
+    //}
 }

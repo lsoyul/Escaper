@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.SceneManagement;
+using UnityEngine.Experimental.Rendering.Universal;
+using DigitalRuby.SoundManagerNamespace;
+
 using static GameStatics;
 
 public class TopMostControl : MonoBehaviour
@@ -18,17 +21,20 @@ public class TopMostControl : MonoBehaviour
     private SCENE_INDEX currentTargetScene;
     private bool isChangingState = false;
 
+    public System.Action<int> onCameraShake;
+    public System.Action onFinishSceneFadeout;
+
 
     private static GameObject container;
     private static TopMostControl instance;
     public static TopMostControl Instance()
     {
-        if (instance == null)
-        {
-            container = new GameObject();
-            container.name = "TopMostControl";
-            instance = container.AddComponent(typeof(TopMostControl)) as TopMostControl;
-        }
+        //if (instance == null)
+        //{
+        //    container = new GameObject();
+        //    container.name = "TopMostControl";
+        //    instance = container.AddComponent(typeof(TopMostControl)) as TopMostControl;
+        //}
 
         return instance;
     }
@@ -40,17 +46,16 @@ public class TopMostControl : MonoBehaviour
 
     private void Awake() {
         
-        if (instance == null) 
+        if (instance == null)
         {
+            container = this.gameObject;
+            container.name = "TopMostControl";
             instance = GetComponent<TopMostControl>();
             DontDestroyOnLoad(this);
 
-            gameControlObj.SetActive(false);
         }
-        else
-        {
-            Destroy(this.gameObject);
-        }
+        gameControlObj.SetActive(false);
+        SoundManager.StopSoundsOnLevelLoad = false;
     }
 
     /// <summary>
@@ -81,6 +86,7 @@ public class TopMostControl : MonoBehaviour
 
     #endregion
 
+
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         isChangingState = false;
@@ -94,12 +100,71 @@ public class TopMostControl : MonoBehaviour
             StageLoader.Instance().SetStage(StageLoader.NextStage);
             gameControlObj.SetActive(true);
             topCanvas.sortingOrder = 10;
+
+            ReturnButton.SetActive(true);
+
+            // #### TEST
+            testscript.gameObject.SetActive(true);
         }
         else
         {
             StageLoader.Instance().DisableStage();
             gameControlObj.SetActive(false);
             topCanvas.sortingOrder = 0;
+
+            ReturnButton.SetActive(false);
+
+            testscript.gameObject.SetActive(false);
+        }
+
+        StartBGM(scene);
+        ChangeEnvironment(scene);
+    }
+
+    public void StartBGM(Scene targetScene)
+    {
+        SoundManager.StopAllLoopingSounds();
+
+        switch (targetScene.buildIndex)
+        {
+            case (int)SCENE_INDEX.MAINMENU:
+                SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["Opening"], 1.0f, 1.0f, true);
+                break;
+            case (int)SCENE_INDEX.GAMESTAGE:
+                if (StageLoader.CurrentStage == 1)
+                {
+                    SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Stage1"], 1.0f, 1.0f, true);
+                }
+                else if (StageLoader.CurrentStage == 2)
+                {
+                    SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Stage2"], 1.0f, 1.0f, true);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    public void ChangeEnvironment(Scene targetScene)
+    {
+        switch (targetScene.buildIndex)
+        {
+            case (int)SCENE_INDEX.MAINMENU:
+                break;
+            case (int)SCENE_INDEX.GAMESTAGE:
+                if (StageLoader.CurrentStage == 1)
+                {
+                    PlayerManager.Instance().CameraController().SetGlobalLightIntensity(0.8f);
+                }
+                else if (StageLoader.CurrentStage == 2)
+                {
+                    PlayerManager.Instance().CameraController().SetGlobalLightIntensity(1.0f);
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -123,6 +188,8 @@ public class TopMostControl : MonoBehaviour
         {
             SceneManager.LoadSceneAsync((int)currentTargetScene, LoadSceneMode.Single);
             blackPanelAlpha.TweenCompleted -= SceneFadeoutFinishEvent;
+
+            if (onFinishSceneFadeout != null) onFinishSceneFadeout();
         }
     }
 
@@ -131,57 +198,90 @@ public class TopMostControl : MonoBehaviour
         return isChangingState;
     }
 
-    #region ### GameOverUI ###
+    public TOPUI_STATUS currentGameUIStatus = TOPUI_STATUS.NORMAL;
 
-    [Header("- GameOverUI -")]
-    public TweenTransforms gameOverTweenTrans;
+    public TOPUI_STATUS GetGameUIStatus()
+    {
+        return currentGameUIStatus;
+    }
+
+    #region ### SecondWind UI ###
+
+    [Header("- SecondWind UI -")]
+    bool isShowingSecondWind = false;
+    public TweenTransforms secondWindTweenTrans;
     public UnityEngine.UI.Text shardsAmountsToRevive;
 
     public GameObject NoMoreRevivePanel;
 
-    private float outXPos_gameOverUI = 900;
-    private float inXPos_gameOverUI = 0;
+    private Vector3 outXPos_gameOverUI = new Vector3(900, -256, 0);
+    private Vector3 inXPos_gameOverUI = new Vector3(243, -256, 0);
 
     public System.Action<MENU_GAMEOVER> onClickGameOverMenu;
 
-    public void ShowGameOver(bool isShow)
+    public void GameOver(bool isShow)
     {
+        ShowUpgradeUI(isShow);
+
         if (PlayerManager.Instance().PlayerStatus.RemainReviveCount > 0)
         {
             NoMoreRevivePanel.SetActive(false);
+
+            if (isShow) ShowSecondWind(true);
+            else ShowSecondWind(false);
         }
         else
         {
             NoMoreRevivePanel.SetActive(true);
+            ShowSecondWind(false);
         }
 
         if (isShow)
-        {
-            gameControlObj.SetActive(false);
+            currentGameUIStatus = TOPUI_STATUS.GAMEOVER;
+        else
+            currentGameUIStatus = TOPUI_STATUS.NORMAL;
+    }
 
+    public void ShowSecondWind(bool isShow)
+    {
+        if (isShow)
+        {
             int shardsAmounts = PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2;
-            shardsAmountsToRevive.text = "-"+shardsAmounts.ToString();
-            gameOverTweenTrans.startingVector.x = outXPos_gameOverUI;
-            gameOverTweenTrans.endVector.x = inXPos_gameOverUI;
+            shardsAmountsToRevive.text = "-" + shardsAmounts.ToString();
+            secondWindTweenTrans.startingVector = outXPos_gameOverUI;
+            secondWindTweenTrans.endVector = inXPos_gameOverUI;
         }
         else
         {
-            gameControlObj.SetActive(true);
-
-            gameOverTweenTrans.startingVector.x = inXPos_gameOverUI;
-            gameOverTweenTrans.endVector.x = outXPos_gameOverUI;
+            secondWindTweenTrans.startingVector = inXPos_gameOverUI;
+            secondWindTweenTrans.endVector = outXPos_gameOverUI;
         }
 
-        gameOverTweenTrans.Begin();
-        gameOverTweenTrans.defaultVector = gameOverTweenTrans.startingVector;
+        if ((isShow == false && isShowingSecondWind == false)
+            || (isShow == true && isShowingSecondWind == true))
+        {
+            secondWindTweenTrans.defaultVector = secondWindTweenTrans.endVector;
+        }
+        else
+        {
+            secondWindTweenTrans.Begin();
+            secondWindTweenTrans.defaultVector = secondWindTweenTrans.startingVector;
+        }
+
+        isShowingSecondWind = isShow;
     }
 
     public void OnClick_GO_MainMenu()
     {
+        GameOver(false);
+        StartChangeScene(SCENE_INDEX.MAINMENU, true);
         if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.MAINMENU);
     }
     public void OnClick_GO_Retry()
     {
+        GameOver(false); 
+        
+        StartChangeScene(SCENE_INDEX.GAMESTAGE, true);
         if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.RETRY);
     }
     public void OnClick_GO_ReviveShards()
@@ -193,4 +293,160 @@ public class TopMostControl : MonoBehaviour
         if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.REVIVE_AD);
     }
     #endregion
+
+    #region ### Upgrade UI ###
+
+    [Header("- Upgrade UI -")]
+    public TweenTransforms upgradeUITweener;
+    public List<UpgradeElement> upgradeElements;
+    public GameObject ReturnButton;
+
+    private Vector3 outXPos_upgradeUI = new Vector3(900, 225, 0);
+    private Vector3 inXPos_upgradeUI = new Vector3(0, 225, 0);
+
+    public System.Action onClickReturn;
+
+    public void ShowUpgradeUI(bool isShow)
+    {
+        if (isShow)
+        {
+            upgradeUITweener.gameObject.SetActive(true);
+
+            upgradeUITweener.startingVector = outXPos_upgradeUI;
+            upgradeUITweener.endVector = inXPos_upgradeUI;
+
+            SetUpgradeInfos(upgradeElements);
+
+            Vibration.Vibrate(100);
+            SoundManager.StopAllLoopingSounds();
+            if (onCameraShake != null) onCameraShake(5);
+        }
+        else
+        {
+            upgradeUITweener.startingVector = inXPos_upgradeUI;
+            upgradeUITweener.endVector = outXPos_upgradeUI;
+
+            upgradeUITweener.TweenCompleted += DeactiveUpgradeUIAfterTweenComplete;
+
+            currentGameUIStatus = TOPUI_STATUS.NORMAL;
+        }
+        upgradeUITweener.Begin();
+        upgradeUITweener.defaultVector = upgradeUITweener.startingVector;
+    }
+
+    public void DeactiveUpgradeUIAfterTweenComplete()
+    {
+        upgradeUITweener.TweenCompleted -= DeactiveUpgradeUIAfterTweenComplete;
+        upgradeUITweener.gameObject.SetActive(false);
+    }
+
+    void SetUpgradeInfos(List<UpgradeElement> upgradeLists)
+    {
+        foreach (UpgradeElement element in upgradeElements)
+        {
+            element.SetInfo();
+            element.onClickUpgradeButton = OnClickUpgradeButton;
+        }
+    }
+
+    public void OnClickReturn()
+    {
+        if (onClickReturn != null) onClickReturn();
+    }
+
+    void OnClickUpgradeButton(SKILL_TYPE skillType)
+    {
+        // Upgrade Possible
+        if ((GetRequiredShardsForUpgrade(skillType) <= PlayerManager.Instance().PlayerStatus.CurrentMemoryShards)
+            && (currentGameUIStatus == TOPUI_STATUS.GAMEOVER))
+        {
+            int requiredShards = GetRequiredShardsForUpgrade(skillType);
+
+            PlayerManager.Instance().PlayerStatus.CurrentMemoryShards -= requiredShards;
+            GameConfigs.SetCurrentMemoryShards(PlayerManager.Instance().PlayerStatus.CurrentMemoryShards);
+
+            GameConfigs.SetSkillLevel(skillType, GameConfigs.SkillLevel(skillType) + 1);
+
+            foreach (UpgradeElement element in upgradeElements)
+            {
+                element.SetInfo();
+            }
+
+
+            int effectShardAmount = (GameConfigs.SkillLevel(skillType) / 3) + 1;
+
+            if (effectShardAmount < 1) effectShardAmount = 1;
+            if (effectShardAmount > 10) effectShardAmount = 10;
+
+            StageLoader.Instance().Generate_SkillUpgradeEffectShards(skillType, effectShardAmount);
+            
+            Vibration.Vibrate(3);
+            StartGlobalLightEffect(Color.white, 1f, 0.2f);
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade].clip);
+
+            if (onCameraShake != null) onCameraShake(2);
+        }
+    }
+
+    #endregion
+
+    #region ### Global Light Effect ###
+
+    [Header("- Top Light Effect -")]
+
+    public Light2D globalLightEffect;
+    public TweenValue globalLightIntensity;
+
+    public bool isGlobalLighting = false;
+
+    #endregion
+
+    private void Update()
+    {
+        if (isGlobalLighting)
+        {
+            globalLightEffect.intensity = globalLightIntensity.value;
+        }
+    }
+
+    public void StartGlobalLightEffect(Color lightColor, float lightIntensity, float oneWaySpeed)
+    {
+        if (isGlobalLighting == false)
+        {
+            globalLightEffect.color = lightColor;
+            globalLightIntensity.myTweenType = TweenBase.playStyles.PingPongOnce;
+            globalLightIntensity.startValue = 0;
+            globalLightIntensity.endValue = lightIntensity;
+            globalLightIntensity.duration = oneWaySpeed;
+
+            isGlobalLighting = true;
+
+            BrightOnLight();
+            StartCoroutine(GlobalLightTimer(oneWaySpeed * 2));
+        }
+    }
+
+    void BrightOnLight()
+    {
+        globalLightIntensity.Begin();
+        globalLightIntensity.value = globalLightIntensity.startValue;
+    }
+
+    IEnumerator GlobalLightTimer(float duration)
+    {
+        float timer = 0;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        globalLightEffect.intensity = 0;
+        isGlobalLighting = false;
+    }
+
+
+    [Header("- TEST -")]
+    public TestScript testscript;
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using UnityEngine.Experimental.Rendering.Universal;
+using DigitalRuby.SoundManagerNamespace;
 
 using static GameStatics;
 
@@ -219,6 +220,7 @@ public class MainMenuControl : MonoBehaviour
         if (TopMostControl.Instance().GetIsSceneChanging() == false)
         {
             TopMostControl.Instance().StartChangeScene(SCENE_INDEX.CUTSCENE, true);
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
         }
     }
 

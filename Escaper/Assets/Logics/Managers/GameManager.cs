@@ -8,6 +8,8 @@ using System;
 //using GooglePlayGames;
 //using GooglePlayGames.BasicApi;
 
+using DigitalRuby.SoundManagerNamespace;
+
 public class GameManager : MonoBehaviour
 {
     private GameStatics.GAME_STATUS currentGameStatus;
@@ -59,7 +61,6 @@ public class GameManager : MonoBehaviour
 
         currentGameStatus = GameStatics.GAME_STATUS.NONE;
         ChangeGameStatus(GameStatics.GAME_STATUS.SPLASH);
-
     }
     
     void Start()
@@ -77,6 +78,8 @@ public class GameManager : MonoBehaviour
         }
 
         InitializeFireBase();
+
+        EffectManager.GetInstance();
 
         //Screen.SetResolution(720, 1280, true, 60);
     }

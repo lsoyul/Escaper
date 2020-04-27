@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 using static GameStatics;
 
+using DigitalRuby.SoundManagerNamespace;
 public class PlayerControllerScripts : MonoBehaviour
 {
     public FlickController flickController;
@@ -25,6 +26,9 @@ public class PlayerControllerScripts : MonoBehaviour
     [Header("- Effects -")]
     public Animator glintAnimation;
     public LightBlink shardLight;
+
+    public Color ColorBlink_AirJump;
+    public Color ColorBlink_Shard;
 
     // Ground Check
     [SerializeField] bool isGround = false;
@@ -48,9 +52,16 @@ public class PlayerControllerScripts : MonoBehaviour
     public LightBlink damagedLight;
     public LightBlink reviveLight;
 
+    public TMPro.TextMeshPro textDamagedObject;
+    public TweenValue textDamagedAlpha;
+    public TweenTransforms textDamagedTransform;
+
     // Falling State
     public bool isFalling = false;
     public bool isFainting = false;
+
+    // Death for upgrade
+    public bool startDeathForUpgradeAct = false;
 
 
     [Header("- Player AirJump Effect -")]
@@ -60,11 +71,14 @@ public class PlayerControllerScripts : MonoBehaviour
     [Header("- ForTest -")]
     public Transform initPos;
 
-    private void Awake() {
+
+    private void Start()
+    {
         if (flickController == null)
         {
             flickController = TopMostControl.Instance().GetController();
-            Debug.LogError("FlickController is null");
+
+            if (flickController == null) Debug.LogError("FlickController is null");
         }
 
         characterScale = playerAnimator.transform.localScale.x;
@@ -73,7 +87,10 @@ public class PlayerControllerScripts : MonoBehaviour
         flickController.onPointerDown += OnPointerDown;
 
         PlayerManager.Instance().onDeath += OnDeath;
-        PlayerManager.Instance().onFinishDoubleJumpCooltime += OnFinishDoubleJumpCooltime;
+        PlayerManager.Instance().onFinishAirTime += OnFinishAirTime;
+
+        TopMostControl.Instance().onClickReturn += OnClickReturnButton;
+        TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
 
         initFixedDeltaTime = Time.fixedDeltaTime;
 
@@ -90,7 +107,13 @@ public class PlayerControllerScripts : MonoBehaviour
         if (PlayerManager.HasInstance())
         {
             PlayerManager.Instance().onDeath -= OnDeath;
-            PlayerManager.Instance().onFinishDoubleJumpCooltime -= OnFinishDoubleJumpCooltime;
+            PlayerManager.Instance().onFinishAirTime -= OnFinishAirTime;
+        }
+
+        if (TopMostControl.HasInstance())
+        {
+            TopMostControl.Instance().onClickReturn -= OnClickReturnButton;
+            TopMostControl.Instance().onClickGameOverMenu -= OnClickGameOverMenu;
         }
     }
 
@@ -106,7 +129,7 @@ public class PlayerControllerScripts : MonoBehaviour
         // Touch Control
         if (flickController.GetIsHolding() && currentRemainJump > 0)
         {
-            if (!isFalling && !isFainting && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup"))
+            if (!isFalling && !isFainting && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup") && !startDeathForUpgradeAct)
             {
                 Vector2 endPos = playerRigidbody2D.transform.position;
                 endPos.x -= flickController.GetFlickedVector().x;
@@ -161,10 +184,8 @@ public class PlayerControllerScripts : MonoBehaviour
             {
                 if (isFalling)
                 {
-                    damagedLight.StartBlink(1.0f);
+                    damagedLight.StartBlink(1.0f, Color.red);
                     PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
-
-                    Vibration.Vibrate(5);
                     isFainting = true;
                     isFalling = false;
                 }
@@ -181,12 +202,9 @@ public class PlayerControllerScripts : MonoBehaviour
     {
         if (flickController.GetFlickedVector().magnitude > 1f && currentRemainJump > 0)
         {
-            if (isGround == false && !PlayerManager.Instance().GetIsDoubleJumpCooltime()) 
+            if (isGround == false) 
             {
-                // Air Jump!
-                // ## Skill ##
-                PlayerManager.Instance().Skill_DoubleJump();
-                // ####################
+                PlayerManager.Instance().SetAirTimeFinish();
 
                 playerRigidbody2D.velocity = Vector2.zero;
                 playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
@@ -195,13 +213,15 @@ public class PlayerControllerScripts : MonoBehaviour
                 Vibration.Vibrate(1);
 
                 if (flickController.GetFlickedVector().magnitude >= 100f)
-                    {
-                        bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
+                {
+                    // Double Jump
+                    bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
 
-                        Vector3 effTargetPos = Vector3.zero;
+                    Vector3 effTargetPos = Vector3.zero;
 
-                        EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_TWICE, flickController.GetFlickedVector(), xReverse, this.transform);
-                    }
+                    EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_TWICE, flickController.GetFlickedVector(), xReverse, this.transform);
+                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_doubleJump], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_doubleJump].clip);
+                }
             }
             else if (isGround == true)
             {
@@ -222,6 +242,7 @@ public class PlayerControllerScripts : MonoBehaviour
                         else effTargetPos.x = groundCheckCenter.position.x + 5f;
 
                         EffectManager.GetInstance().playEffect(effTargetPos, GameStatics.EFFECT.JUMP_SMOKE, Vector2.zero, xReverse);
+                        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_jump], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_jump].clip);
                     }
                 }
             }
@@ -236,10 +257,14 @@ public class PlayerControllerScripts : MonoBehaviour
 
     void OnPointerDown()
     {
-        if (!isFalling && !isFainting)
+        if (!isFalling && !isFainting && !startDeathForUpgradeAct)
         {
-            if (currentRemainJump > 0 && isGround == false && isHurting == false && !PlayerManager.Instance().GetIsDoubleJumpCooltime())
+            if (currentRemainJump > 0 && isGround == false && isHurting == false)
             {
+                //#### SKILL AIRTIME ####
+                PlayerManager.Instance().Skill_AirTime();
+                //#######################
+
                 timescale = slowDownTimescale;
                 Vibration.Vibrate(3);
                 playerRenderer.material.color = Color.yellow;
@@ -251,7 +276,7 @@ public class PlayerControllerScripts : MonoBehaviour
         }
         else
         {
-            if (isFainting && !isFalling)
+            if (isFainting && !isFalling && !startDeathForUpgradeAct)
             {
                 // Fainting on the ground
                 isFainting = false;
@@ -302,6 +327,7 @@ public class PlayerControllerScripts : MonoBehaviour
         playerAnimator.SetBool("isDead", PlayerManager.Instance().IsDead);
         playerAnimator.SetBool("isFalling", isFalling);
         playerAnimator.SetBool("isFainting", isFainting);
+        playerAnimator.SetBool("startDeathForUpgradeAct", startDeathForUpgradeAct);
 
         glintAnimation.speed = 1f / Time.timeScale;
 
@@ -332,11 +358,11 @@ public class PlayerControllerScripts : MonoBehaviour
         }
 
         // DoubleJump Cooltime
-        if (PlayerManager.Instance().GetIsDoubleJumpCooltime())
+        if (PlayerManager.Instance().GetIsAirTime())
         {
             skillCooltime.SetActive(true);
             Vector3 progressVector = skillCooltime.transform.localScale;
-            double scaleX = 1f - (PlayerManager.Instance().GetDoubleJumpTimer() / PlayerManager.Instance().PlayerStatus.DoubleJumpCooltime);
+            double scaleX = 1f - (PlayerManager.Instance().GetAirTimeTimer() / PlayerManager.Instance().PlayerStatus.AirTimeDuration);
             progressVector.x = (float)scaleX * 4f;
             skillCooltime.transform.localScale = progressVector;
         }
@@ -344,6 +370,11 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             skillCooltime.SetActive(false);
         }
+
+        // DamageText Effect
+        Color t = textDamagedObject.color;
+        t.a = textDamagedAlpha.value;
+        textDamagedObject.color = t;
     }   
 
     void ControlGroundCollide()
@@ -384,15 +415,57 @@ public class PlayerControllerScripts : MonoBehaviour
                     {
                         //Debug.Log("Damage_spike");
                         //Debug.Log("---------------------Hit!");
-                        damagedLight.StartBlink(this.unbeatableDuration_hurt);
+                        damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
                         StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
-
                         PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.SPIKE);                        
                     }
                 }
                 break;
+                case "MoveTrigger":{
+                        playerRigidbody2D.velocity = Vector2.zero;
+                        MoveTrigger trigger = collider.GetComponent<MoveTrigger>();
+
+                        if (trigger != null)
+                        {
+                            if (trigger.TriggerOn)
+                            {
+                                if (trigger.moveTrigger == MOVE_TRIGGER.MOVE_POSITION)
+                                {
+                                    Transform tempTarget = collider.GetComponent<MoveTrigger>().targetPosition;
+                                    playerRigidbody2D.position = new Vector2(tempTarget.position.x, tempTarget.position.y);
+                                    //playerRigidbody2D.MovePosition(new Vector2(tempTarget.position.x, tempTarget.position.y));
+                                }
+                                else if (trigger.moveTrigger == MOVE_TRIGGER.MOVE_NEXTSTAGE)
+                                {
+                                    TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMESTAGE, true, StageLoader.CurrentStage + 1);
+                                    trigger.TriggerOn = false;
+                                }
+                            }
+                        }
+                }
+                break;
             }       
         }
+    }
+
+    public void ShowDamageText(int damageNumber)
+    {
+        textDamagedObject.gameObject.SetActive(true);
+        textDamagedObject.text = "-"+damageNumber.ToString();
+        textDamagedAlpha.Begin();
+        textDamagedTransform.Begin();
+
+        textDamagedAlpha.value = textDamagedAlpha.startValue;
+        textDamagedTransform.vector3Results = textDamagedTransform.startingVector;
+
+        textDamagedAlpha.TweenCompleted += HideDamageText;
+    }
+
+    void HideDamageText()
+    {
+        textDamagedObject.text = string.Empty;
+        textDamagedObject.gameObject.SetActive(false);
+        textDamagedAlpha.TweenCompleted -= HideDamageText;
     }
 
     
@@ -428,7 +501,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
     IEnumerator TriggerOverWhelming(float unbeatableDuration)
     {
-        reviveLight.StartBlink(unbeatableDuration);
+        reviveLight.StartBlink(unbeatableDuration, Color.yellow);
         float timer = 0f;
         reviveTime = true;
         isHurting = false;
@@ -447,9 +520,11 @@ public class PlayerControllerScripts : MonoBehaviour
         yield break;
     }
 
-    void OnFinishDoubleJumpCooltime()
+    void OnFinishAirTime()
     {
-        airJumpLight.StartBlink(0.7f);
+        timescale = 1.0f;
+        if (currentRemainJump > 0) currentRemainJump -= 1;
+        airJumpLight.StartBlink(0.7f, ColorBlink_AirJump);
     }
 
     void OnDeath(bool isDead)
@@ -467,25 +542,50 @@ public class PlayerControllerScripts : MonoBehaviour
         return playerRigidbody2D;
     }
 
-    public void BlinkPlayerShardLight()
+    void OnClickReturnButton()
     {
-        shardLight.StartBlink(0.5f);
+        // Death for Upgrade
+        if (isGround && !PlayerManager.Instance().IsDead && !startDeathForUpgradeAct)
+        {
+            startDeathForUpgradeAct = true;
+            PlayerManager.Instance().PlayerStatus.CurrentHP = 0;
+            damagedLight.StartBlink(2f, Color.red);
+
+            TopMostControl.Instance().GameOver(true);
+            TopMostControl.Instance().StartGlobalLightEffect(Color.magenta, 3f, 0.3f);
+
+            if (PlayerManager.Instance().CameraController() != null)
+            {
+                PlayerManager.Instance().CameraController().CameraShake_Rot(5);
+            }
+        }
     }
 
-    #region TEST
-
-    [ContextMenu("PlayJumpSmoke")]
-    void PlayJumpsmoke()
+    void OnClickGameOverMenu(MENU_GAMEOVER menu)
     {
-        EffectManager.GetInstance().playEffect(playerRigidbody2D.position, GameStatics.EFFECT.JUMP_SMOKE, Vector2.zero);
+        switch (menu)
+        {
+            case MENU_GAMEOVER.MAINMENU:
+                break;
+            case MENU_GAMEOVER.RETRY:
+                if (startDeathForUpgradeAct)
+                {
+                    startDeathForUpgradeAct = false;
+                }
+                break;
+            case MENU_GAMEOVER.REVIVE_SHARDS:
+                break;
+            case MENU_GAMEOVER.REVIVE_AD:
+                break;
+            default:
+                break;
+        }
     }
 
-    [ContextMenu("Revive")]
-    void TEST_Revive()
+    public void BlinkPlayerShardLight(Color shardColor)
     {
-        PlayerManager.Instance().PlayerStatus.CurrentHP = PlayerManager.Instance().PlayerStatus.MaxHP;
+        shardLight.StartBlink(0.5f, shardColor);
     }
 
-    #endregion
 
 }

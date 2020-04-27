@@ -7,7 +7,7 @@ using System;
 public class PlayerStatus
 {
 	private int maxHP;
-	private double doubleJumpCooltime;
+	private double airTimeDuration;
 
 	private int currentMemoryShards;
 
@@ -46,11 +46,11 @@ public class PlayerStatus
 	}
 
 
-	public double DoubleJumpCooltime
+	public double AirTimeDuration
 	{
 		get {
-			doubleJumpCooltime = GameStatics.default_DoubleJumpCooltime + (GameStatics.default_IncDoublejumpCooltime * GameConfigs.SkillLevel_DoubleJumpCooltime);
-			return doubleJumpCooltime; 
+			airTimeDuration = GameStatics.default_AirTimeDuration + (GameStatics.default_IncAirTimeDuration * GameConfigs.SkillLevel(GameStatics.SKILL_TYPE.AIRTIME_DURATION));
+			return airTimeDuration; 
 		}
 	}
 
@@ -58,7 +58,7 @@ public class PlayerStatus
 	public int MaxHP
 	{
 		get {
-			maxHP = GameStatics.default_BaseMaxHP + (GameStatics.default_IncHP * GameConfigs.SkillLevel_MaxHP);	
+			maxHP = GameStatics.default_BaseMaxHP + (GameStatics.default_IncHP * GameConfigs.SkillLevel(GameStatics.SKILL_TYPE.MAXHP));	
 			return maxHP; 
 		}
 	}

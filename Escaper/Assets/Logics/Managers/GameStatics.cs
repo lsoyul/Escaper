@@ -9,12 +9,11 @@ public static class GameStatics
     #region ### Default Status ###
 
     public const int default_IncHP = 5;
-    public const double default_IncDoublejumpCooltime = -0.1f;
+    public const double default_IncAirTimeDuration = 0.1f;
     public const double default_IncShardsPullDistance = 1f;
     public const int default_BaseMaxHP = 40;
-    public const double default_DoubleJumpCooltime = 3f;
+    public const double default_AirTimeDuration = 0.5f;
     public const double default_ShardsPullDistance = 10.0f;
-    public const int default_IncMemoryShards = 10;
     // Ads sale ratio
     public const double default_MultiflyRatio = 1.5f;
     public const int default_MaxReviceCount = 1;
@@ -51,7 +50,8 @@ public static class GameStatics
     {
         JUMP_SMOKE,
         JUMP_TWICE,
-        GET_SHARD
+        GET_SHARD,
+        YELLOW_PILLAR
     }
 
     public enum DAMAGED_TYPE
@@ -62,6 +62,7 @@ public static class GameStatics
 
     public enum SHARD_TYPE
     {
+        EFFECT,
         SHARD1,
         SHARD2
     }
@@ -72,6 +73,29 @@ public static class GameStatics
         STAGE2,
         STAGE3
     }
+
+    public enum SKILL_TYPE
+    {
+        MAXHP,
+        AIRTIME_DURATION,
+        SHARD_PULL_DIST
+    }
+
+    public enum UPGRADE_STATUS
+    {
+        POSSIBLE,
+        NOT_ENOUGH_SHARD,
+        MAX_LEVEL
+    }
+
+    public enum TOPUI_STATUS
+    {
+        NORMAL,
+        GAMEOVER,
+        GAMEOVER_SELF
+    }
+
+    #region #### Logics ####
 
     public static float Angle(Vector2 p_vector2)
     {
@@ -84,6 +108,40 @@ public static class GameStatics
             return Mathf.Atan2(p_vector2.x, p_vector2.y) * Mathf.Rad2Deg;
         }
     }
+
+    public static int GetRequiredShardsForUpgrade(SKILL_TYPE skillType)
+    {
+        int result = int.MaxValue;
+
+        switch (skillType)
+        {
+            case SKILL_TYPE.MAXHP:
+                const int default_IncHPShards = 10;
+                result = (GameConfigs.SkillLevel(skillType) + 1) * default_IncHPShards;
+                break;
+            case SKILL_TYPE.AIRTIME_DURATION:
+                const int default_IncCoolShards = 50;
+                result = (GameConfigs.SkillLevel(skillType) + 1) * default_IncCoolShards;
+                break;
+            case SKILL_TYPE.SHARD_PULL_DIST:
+                const int default_IncDistShards = 40;
+                result = (GameConfigs.SkillLevel(skillType) + 1) * default_IncDistShards;
+                break;
+            default:
+                break;
+        }
+
+        return result;
+
+    }
+
+    public static double GetShardPullDistance()
+    {
+        return default_ShardsPullDistance + (default_IncShardsPullDistance * GameConfigs.SkillLevel(GameStatics.SKILL_TYPE.SHARD_PULL_DIST));
+    }
+
+    #endregion
+
 
     #region #### Shards variables ####
 
@@ -108,11 +166,72 @@ public static class GameStatics
 
     #region #### Damage Points ####
 
-    public const int DMG_SPIKE_BASIC = 20;
-    public const int DMG_FALLING = 50;
+    private static int DAMAGE_BASIC_SPIKE = 20;
+
+    public static int GetDamagePoints(DAMAGED_TYPE damageType)
+    {
+        switch (damageType)
+        {
+            case DAMAGED_TYPE.SPIKE:
+                return DAMAGE_BASIC_SPIKE * StageLoader.CurrentStage;
+            case DAMAGED_TYPE.FALLING_GROUND:
+                return (PlayerManager.Instance().PlayerStatus.MaxHP / 2);
+            default:
+                return 0;
+        }
+    }
+
 
     #endregion
 
+    #region #### Sound String Refers ####
+
+    public const string sound_doubleJump = "sound_doubleJump";
+    public const string sound_fallGround = "sound_fallGround";
+    public const string sound_gainShard  = "sound_gainShard";
+    public const string sound_hitWall    = "sound_hitWall";
+    public const string sound_jump       = "sound_jump";
+    public const string sound_jumpStomp  = "sound_jumpStomp";
+    public const string sound_portalMove = "sound_portalMove";
+    public const string sound_revive     = "sound_revive";
+    public const string sound_select     = "sound_select";
+    public const string sound_timestop   = "sound_timestop";
+    public const string sound_upgrade = "sound_upgrade";
+    #endregion
+
+    #region #### Warp Trigger ####
+
+    public enum MOVE_TRIGGER
+    {
+        MOVE_POSITION,
+        MOVE_NEXTSTAGE
+    }
+
+    public static float GetCameraMinimumYAxis(int stage)
+    {
+        switch (stage)
+        {
+            case 1:
+                return 0;
+            case 2:
+                return -51f;
+            default:
+                return 0;
+        }
+    }
+
+    #endregion
+
+    #region #### Animation Sprites name ####
+
+    public enum PLAYER_SPRITE
+    {
+        NORMAL,
+        TRUE_HERO
+    }
+
+
+    #endregion
 
     #region #### Log Events ####
 
@@ -128,7 +247,7 @@ public static class GameStatics
 
     public const string PREFS_MaxProgressStage = "PREFS_MaxProgressStage";
     public const string PREFS_SkillLevel_MaxHP = "PREFS_SkillLevel_MaxHP";
-    public const string PREFS_SkillLevel_DoubleJumpCooltime = "PREFS_SkillLevel_DoubleJumpCooltime";
+    public const string PREFS_SkillLevel_AirTimeDuration = "PREFS_SkillLevel_AirTimeDuration";
     public const string PREFS_SkillLevel_IncreaseShardsPullDistance = "PREFS_SkillLevel_IncreaseShardsPullDistance";
     public const string PREFS_CurrentMemoryShards = "PREFS_CurrentMemoryShards";
 

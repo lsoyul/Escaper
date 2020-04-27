@@ -36,8 +36,8 @@ public class GameUI : MonoBehaviour
 
     private void Start()
     {
-        PlayHPTween(false);
-        PlayShardTween(false);
+        PlayHPTween(true);
+        PlayShardTween(true);
     }
 
     void OnChangePlayerStatus()

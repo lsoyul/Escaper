@@ -25,6 +25,7 @@ public class EffectManager : MonoBehaviour
     {
         Resources.Load("Effects/Eff_jumpsmoke");
         Resources.Load("Effects/Eff_jumptwice");
+        Resources.Load("Effects/Eff_MagicPillarBlastYellow");
     }
 
 
@@ -61,7 +62,20 @@ public class EffectManager : MonoBehaviour
             case GameStatics.EFFECT.GET_SHARD:
 
                 break;
+            case GameStatics.EFFECT.YELLOW_PILLAR:
+
+                Vector3 fixedTargetPos = targetPos;
+                fixedTargetPos.y -= 14f;
+
+                go_eff = Instantiate(Resources.Load("Effects/Eff_MagicPillarBlastYellow"), fixedTargetPos, Quaternion.Euler(-90, 0, 0)) as GameObject;
+                if (parent != null)
+                {
+                    go_eff.transform.parent = parent;
+                    go_eff.transform.localPosition = targetPos;
+                }
+                break;
         }
+
     }
 
 }

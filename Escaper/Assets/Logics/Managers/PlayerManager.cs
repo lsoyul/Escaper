@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.SceneManagement;
 using System;
+using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
 
 public class PlayerManager : MonoBehaviour
@@ -11,20 +13,54 @@ public class PlayerManager : MonoBehaviour
     private static PlayerManager instance;
     public static PlayerManager Instance()
     {
-        if (instance == null)
-        {
-            container = new GameObject();
-            container.name = "PlayerManager";
-            instance = container.AddComponent(typeof(PlayerManager)) as PlayerManager;
-        }
+        //if (instance == null)
+        //{
+        //    container = new GameObject();
+        //    container.name = "PlayerManager";
+        //    instance = container.AddComponent(typeof(PlayerManager)) as PlayerManager;
+        //}
 
         return instance;
+    }
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            container = this.gameObject;
+            container.name = "PlayerManager";   
+            instance = GetComponent<PlayerManager>();
+            DontDestroyOnLoad(this);
+        }
+
+        SetPlayerController(false);
+
+        if (playerStatus == null) playerStatus = new PlayerStatus();
+
+        playerStatus.onChangePlayerStatus += OnChangePlayerStatus;
+
+        TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
     }
 
     public static bool HasInstance()
     {
         return instance;
     }
+
+    #region ### Camera ###
+
+    CameraControlScript cameraController;
+
+    public void SetCameraController(CameraControlScript cam)
+    {
+        cameraController = cam;
+    }
+
+    public CameraControlScript CameraController()
+    {
+        return cameraController;
+    }
+
+    #endregion
 
     #region ### Player ###
 
@@ -83,28 +119,8 @@ public class PlayerManager : MonoBehaviour
     public Action onChangePlayerStatus;
     public Action<bool> onDeath;
 
-    public Action onFinishDoubleJumpCooltime;
+    public Action onFinishAirTime;
 
-    private void Awake()
-    {
-        if(instance == null)
-        {
-            instance = GetComponent<PlayerManager>();
-            DontDestroyOnLoad(this);
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
-
-        SetPlayerController(false);
-
-        if (playerStatus == null) playerStatus = new PlayerStatus();
-
-        playerStatus.onChangePlayerStatus += OnChangePlayerStatus;
-
-        TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
-    }
 
     private void OnDestroy()
     {
@@ -121,13 +137,20 @@ public class PlayerManager : MonoBehaviour
 
     void OnChangePlayerStatus()
     {
-        if (IsDead)
+        //if (IsDead)
+        //{
+        //    if (playerStatus.CurrentHP > 0)
+        //    {
+        //        // Revive
+        //        IsDead = false;
+        //
+        //    }
+        //}
+
+        if (playerStatus.CurrentHP > 0)
         {
-            if (playerStatus.CurrentHP > 0)
-            {
-                // Revive
-                IsDead = false;
-            }
+            if (playerController.startDeathForUpgradeAct == true) playerController.startDeathForUpgradeAct = false;
+            if (IsDead) IsDead = false;
         }
 
         if (playerStatus.CurrentHP <= 0)
@@ -147,13 +170,17 @@ public class PlayerManager : MonoBehaviour
 
     public void OnDamaged(DAMAGED_TYPE damageType)
     {
+        playerStatus.CurrentHP -= GameStatics.GetDamagePoints(damageType);
+        playerController.ShowDamageText(GameStatics.GetDamagePoints(damageType));
         switch (damageType)
         {
             case DAMAGED_TYPE.SPIKE:
-                playerStatus.CurrentHP -= GameStatics.DMG_SPIKE_BASIC;
+                TopMostControl.Instance().StartGlobalLightEffect(Color.red, 1f, 0.2f);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall].clip);
                 break;
             case DAMAGED_TYPE.FALLING_GROUND:
-                playerStatus.CurrentHP -= GameStatics.DMG_FALLING;
+                TopMostControl.Instance().StartGlobalLightEffect(Color.red, 2f, 0.4f);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround].clip);
                 break;
             default:
                 break;
@@ -166,11 +193,16 @@ public class PlayerManager : MonoBehaviour
     public void OnGround()
     {
         // If player grounded,
+        SetAirTimeFinish();
 
         if (IsDead)
         {
             // GameOver Check (by check current hp)
-            TopMostControl.Instance().ShowGameOver(true);
+            TopMostControl.Instance().GameOver(true);
+        }
+        else
+        {
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_jumpStomp], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_jumpStomp].clip);
         }
     }
 
@@ -181,31 +213,53 @@ public class PlayerManager : MonoBehaviour
             case MENU_GAMEOVER.MAINMENU:
                 // Save Memory Shards..
                 GameConfigs.SetCurrentMemoryShards(PlayerStatus.CurrentMemoryShards);
-                TopMostControl.Instance().ShowGameOver(false);
-                TopMostControl.Instance().StartChangeScene(SCENE_INDEX.MAINMENU, true);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
                 break;
             case MENU_GAMEOVER.RETRY:
                 // Save Memory Shards..
                 GameConfigs.SetCurrentMemoryShards(PlayerStatus.CurrentMemoryShards);
-                TopMostControl.Instance().ShowGameOver(false);
-                TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMESTAGE, true, StageLoader.CurrentStage);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
                 break;
             case MENU_GAMEOVER.REVIVE_SHARDS:
 
                 if (PlayerStatus.RemainReviveCount > 0)
                 {
+                    Vibration.Vibrate(100);
                     PlayerStatus.CurrentMemoryShards = PlayerStatus.CurrentMemoryShards / 2;
                     PlayerStatus.CurrentHP = PlayerStatus.MaxHP / 2;
-                    TopMostControl.Instance().ShowGameOver(false);
                     PlayerStatus.RemainReviveCount -= 1;
+
+                    TopMostControl.Instance().StartGlobalLightEffect(Color.yellow, 2f, 0.2f);
+                    TopMostControl.Instance().GameOver(false);
+
+                    if (cameraController != null)
+                    {
+                        cameraController.CameraShake_Rot(5);
+                    }
+
+                    EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
+                    TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
+                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
                 }
                 break;
             case MENU_GAMEOVER.REVIVE_AD:
                 if (PlayerStatus.RemainReviveCount > 0)
                 {
+                    Vibration.Vibrate(100);
                     PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
-                    TopMostControl.Instance().ShowGameOver(false);
                     PlayerStatus.RemainReviveCount -= 1;
+
+                    TopMostControl.Instance().StartGlobalLightEffect(Color.yellow, 2f, 0.2f);
+                    TopMostControl.Instance().GameOver(false);
+
+                    if (cameraController != null)
+                    {
+                        cameraController.CameraShake_Rot(5);
+                    }
+
+                    EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
+                    TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
+                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
                 }
                 break;
             default:
@@ -213,15 +267,27 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    void OnClickReturnButton()
+    {
+        // Death for upgrade hero
+
+    }
+
     #region ### Shard get callback ###
 
 
-    public void OnGetShard(SHARD_TYPE shardType)
+    public void OnGetShard(MemoryShard shard)
     {
-        PlayerStatus.CurrentMemoryShards +=
-            (int)(StageLoader.Instance().GetRandomShard(shardType) * StageLoader.Instance().GetShardMultifly());
+        if (shard.GetShardType() == SHARD_TYPE.SHARD1)
+        {
+            PlayerStatus.CurrentMemoryShards +=
+                (int)(StageLoader.Instance().GetRandomShard(shard.GetShardType()) * StageLoader.Instance().GetShardMultifly());
 
-        PlayerManager.Instance().GetPlayerControl().BlinkPlayerShardLight();
+            TopMostControl.Instance().StartGlobalLightEffect(shard.GetShardTargetColor(), 0.3f, 0.1f);
+        }
+
+        GetPlayerControl().BlinkPlayerShardLight(shard.GetShardTargetColor());
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_gainShard], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_gainShard].clip);
     }
 
     #endregion
@@ -229,41 +295,45 @@ public class PlayerManager : MonoBehaviour
     #region ### Skill Controls ###
 
 
-    private double doubleJumpTimer = 0f;
-    private bool isDoubleJumpCooltime = false;
+    private double airTimeTimer = 0f;
+    private bool isAirTime = false;
 
-    IEnumerator DoubleJump()
+    IEnumerator AirTime()
     {
-        isDoubleJumpCooltime = true;
-        doubleJumpTimer = 0f;
+        isAirTime = true;
+        airTimeTimer = 0f;
 
-        while (doubleJumpTimer < PlayerStatus.DoubleJumpCooltime)
+        while (airTimeTimer < PlayerStatus.AirTimeDuration)
         {
-            doubleJumpTimer += Time.deltaTime;
-            Debug.Log("## DoubleJump : " + doubleJumpTimer + " / " + PlayerStatus.DoubleJumpCooltime);
+            airTimeTimer += Time.unscaledDeltaTime;
             yield return null;
         }
 
-        doubleJumpTimer = PlayerStatus.DoubleJumpCooltime;
+        airTimeTimer = 0;
 
-        isDoubleJumpCooltime = false;
+        isAirTime = false;
 
-        if (onFinishDoubleJumpCooltime != null) onFinishDoubleJumpCooltime();
+        if (onFinishAirTime != null) onFinishAirTime();
     }
 
-    public void Skill_DoubleJump()
+    public void Skill_AirTime()
     {
-        StartCoroutine(DoubleJump());
+        StartCoroutine(AirTime());
     }
 
-    public bool GetIsDoubleJumpCooltime()
+    public bool GetIsAirTime()
     {
-        return isDoubleJumpCooltime;
+        return isAirTime;
     }
 
-    public double GetDoubleJumpTimer()
+    public double GetAirTimeTimer()
     {
-        return doubleJumpTimer;
+        return airTimeTimer;
+    }
+
+    public void SetAirTimeFinish()
+    {
+        airTimeTimer = PlayerStatus.AirTimeDuration;
     }
 
     #endregion
