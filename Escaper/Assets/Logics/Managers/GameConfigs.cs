@@ -16,12 +16,28 @@ public class GameConfigs
     private const int maxSkillLevel_AirTimeDuration = 25;
     private const int maxSkillLevel_ShardPullDistance = 30;
 
+    private static int portal_stage1_1 = 0;
+    private static int portal_stage2_1 = 0;
+
     #endregion
 
     #region ### GETTER ###
     public static int MaxProgressStage
     {
         get { return maxProgressStage; }
+    }
+
+    public static bool PortalStatus(GameStatics.PORTAL_TYPE portalType)
+    {
+        switch (portalType)
+        {
+            case GameStatics.PORTAL_TYPE.STAGE1_1:
+                return (portal_stage1_1 == 0) ? false : true;
+            case GameStatics.PORTAL_TYPE.STAGE2_1:
+                return (portal_stage2_1 == 0) ? false : true;
+            default:
+                return false;
+        }
     }
 
     public static int SkillLevel(GameStatics.SKILL_TYPE skillType)
@@ -68,6 +84,9 @@ public class GameConfigs
         skillLevel_AirTimeDuration = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_AirTimeDuration, 0);
         skillLevel_IncreaseShardsPullDistance = PlayerPrefs.GetInt(GameStatics.PREFS_SkillLevel_IncreaseShardsPullDistance, 0);
         currentMemoryShards = PlayerPrefs.GetInt(GameStatics.PREFS_CurrentMemoryShards, 0);
+
+        portal_stage1_1 = PlayerPrefs.GetInt(GameStatics.PREFS_PORTAL_Stage1_1, 0);
+        portal_stage2_1 = PlayerPrefs.GetInt(GameStatics.PREFS_PORTAL_Stage2_1, 0);
     }
 
     public static void InitializeConfigs()
@@ -83,6 +102,8 @@ public class GameConfigs
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_AirTimeDuration, skillLevel_AirTimeDuration);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_IncreaseShardsPullDistance, skillLevel_IncreaseShardsPullDistance);
         PlayerPrefs.SetInt(GameStatics.PREFS_CurrentMemoryShards, currentMemoryShards);
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage1_1, 0);
     }
 
     public static void SetMaxProgressStage(int maxStage)
@@ -120,5 +141,22 @@ public class GameConfigs
     {
         currentMemoryShards = memoryShardsAmount;
         PlayerPrefs.SetInt(GameStatics.PREFS_CurrentMemoryShards, currentMemoryShards);
+    }
+
+    public static void SetPortalStatus(GameStatics.PORTAL_TYPE portalType, bool isOn)
+    {
+        int isOnInt = (isOn) ? 1 : 0;
+
+        switch (portalType)
+        {
+            case GameStatics.PORTAL_TYPE.STAGE1_1:
+                PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage1_1, isOnInt);
+                break;
+            case GameStatics.PORTAL_TYPE.STAGE2_1:
+                PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage2_1, isOnInt);
+                break;
+            default:
+                break;
+        }
     }
 }

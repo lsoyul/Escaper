@@ -35,4 +35,17 @@ public class TestScript : MonoBehaviour
     {
         GameConfigs.SetSkillLevel(GameStatics.SKILL_TYPE.SHARD_PULL_DIST,int.Parse(distanceSkillLevelString.text));
     }
+
+    public void OnClickPortalOn()
+    {
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE1_1, true);
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE2_1, true);
+    }
+
+
+    public void OnClickPortalOff()
+    {
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE1_1, false);
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE2_1, false);
+    }
 }

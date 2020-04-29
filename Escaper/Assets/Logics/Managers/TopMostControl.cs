@@ -402,6 +402,85 @@ public class TopMostControl : MonoBehaviour
 
     #endregion
 
+    #region ### Portal Purchase UI ###
+
+    public bool IsShowingPortalPurchaseUI = false;
+    public bool IsCollidingPortalPurchase = false;
+
+    public TweenTransforms portalPurchaseTweenTrans;
+    public UnityEngine.UI.Text shardsAmountsToOpenPortal;
+
+    public GameObject NoPortalPurchasePanel;
+
+    private Vector3 outXPos_portalPurchaseUI = new Vector3(-900, -549, 0);
+    private Vector3 inXPos_portalPurchaseUI = new Vector3(-243, -549, 0);
+
+    public MoveTrigger currentSelectedPortalTrigger;
+
+    public void ShowPortalPurchaseUI(bool isShow, MoveTrigger moveTrigger = null)
+    {
+        if (isShow && (moveTrigger != null))
+        {
+            // Show PortalPurchase
+            portalPurchaseTweenTrans.gameObject.SetActive(true);
+
+            portalPurchaseTweenTrans.startingVector = portalPurchaseTweenTrans.transform.localPosition;
+            portalPurchaseTweenTrans.endVector = inXPos_portalPurchaseUI;
+
+            shardsAmountsToOpenPortal.text = GameStatics.GetPortalOpenCost(moveTrigger.portalType).ToString();
+            CheckPortalPurchaseCostBlock(moveTrigger.portalType);
+
+            currentSelectedPortalTrigger = moveTrigger;
+        }
+        else
+        {
+            portalPurchaseTweenTrans.startingVector = portalPurchaseTweenTrans.transform.localPosition;
+            portalPurchaseTweenTrans.endVector = outXPos_portalPurchaseUI;
+
+            NoPortalPurchasePanel.SetActive(true);
+            currentSelectedPortalTrigger = null;
+        }
+
+        portalPurchaseTweenTrans.Begin();
+        portalPurchaseTweenTrans.defaultVector = portalPurchaseTweenTrans.startingVector;
+
+        IsShowingPortalPurchaseUI = isShow;
+    }
+
+    void CheckPortalPurchaseCostBlock(PORTAL_TYPE portalType)
+    {
+        if (GameStatics.GetPortalOpenCost(portalType) < PlayerManager.Instance().PlayerStatus.CurrentMemoryShards)
+        {
+            // Pucharsable
+            NoPortalPurchasePanel.SetActive(false);
+        }
+        else
+        {
+            NoPortalPurchasePanel.SetActive(true);
+        }
+    }
+
+    public void OnClickPortalPurchase()
+    {
+        if (currentSelectedPortalTrigger != null)
+        {
+            if (GameStatics.GetPortalOpenCost(currentSelectedPortalTrigger.portalType) <= PlayerManager.Instance().PlayerStatus.CurrentMemoryShards)
+            {
+                // Open the portal
+                PlayerManager.Instance().PlayerStatus.CurrentMemoryShards -= GameStatics.GetPortalOpenCost(currentSelectedPortalTrigger.portalType);
+                GameConfigs.SetPortalStatus(currentSelectedPortalTrigger.portalType, true);
+
+                currentSelectedPortalTrigger.SetPortal(true);
+
+                StartGlobalLightEffect(Color.magenta, 4f, 0.6f);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade].clip);
+                if (onCameraShake != null) onCameraShake(7);
+            }
+        }
+    }
+
+    #endregion
+
     #region ### Global Light Effect ###
 
     [Header("- Top Light Effect -")]
@@ -418,6 +497,12 @@ public class TopMostControl : MonoBehaviour
         if (isGlobalLighting)
         {
             globalLightEffect.intensity = globalLightIntensity.value;
+        }
+
+
+        if (IsCollidingPortalPurchase == false && IsShowingPortalPurchaseUI == true)
+        {
+            ShowPortalPurchaseUI(false, null);
         }
     }
 

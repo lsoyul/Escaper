@@ -95,6 +95,13 @@ public static class GameStatics
         GAMEOVER_SELF
     }
 
+    public enum PORTAL_TYPE
+    {
+        NONE,
+        STAGE1_1,
+        STAGE2_1,
+    }
+
     #region #### Logics ####
 
     public static float Angle(Vector2 p_vector2)
@@ -166,7 +173,7 @@ public static class GameStatics
 
     #region #### Damage Points ####
 
-    private static int DAMAGE_BASIC_SPIKE = 20;
+    private static int DAMAGE_BASIC_SPIKE = 10;
 
     public static int GetDamagePoints(DAMAGED_TYPE damageType)
     {
@@ -205,6 +212,19 @@ public static class GameStatics
     {
         MOVE_POSITION,
         MOVE_NEXTSTAGE
+    }
+
+    public static int GetPortalOpenCost(PORTAL_TYPE portalType)
+    {
+        switch (portalType)
+        {
+            case PORTAL_TYPE.STAGE1_1:
+                return 2000;
+            case PORTAL_TYPE.STAGE2_1:
+                return 5000;
+            default:
+                return 0;
+        }
     }
 
     public static float GetCameraMinimumYAxis(int stage)
@@ -251,6 +271,8 @@ public static class GameStatics
     public const string PREFS_SkillLevel_IncreaseShardsPullDistance = "PREFS_SkillLevel_IncreaseShardsPullDistance";
     public const string PREFS_CurrentMemoryShards = "PREFS_CurrentMemoryShards";
 
+    public const string PREFS_PORTAL_Stage1_1 = "PREFS_PORTAL_Stage1_1";
+    public const string PREFS_PORTAL_Stage2_1 = "PREFS_PORTAL_Stage2_1";
 
     #endregion
 }

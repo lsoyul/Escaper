@@ -311,10 +311,23 @@ public class PlayerControllerScripts : MonoBehaviour
         castOrigin.y -= 0.21f;
         RaycastHit2D groundHit = Physics2D.BoxCast(castOrigin, groundCheckColliderSize, 0f, Vector2.down, 0f);
 
-        if (groundHit) groundCollideObject = groundHit.collider;
+        if (groundHit)
+        {
+            if (groundHit.collider.tag == "Platform"
+                || groundHit.collider.tag == "MovingPlatform")
+            {
+                groundCollideObject = groundHit.collider;
+                return true;
+            }
+            else
+            {
+                groundCollideObject = null;
+                return false;
+            }
+        }
         else groundCollideObject = null;
 
-        return groundHit;
+        return false;
     }
 
     void UpdateAnimator()
@@ -422,7 +435,6 @@ public class PlayerControllerScripts : MonoBehaviour
                 }
                 break;
                 case "MoveTrigger":{
-                        playerRigidbody2D.velocity = Vector2.zero;
                         MoveTrigger trigger = collider.GetComponent<MoveTrigger>();
 
                         if (trigger != null)
@@ -434,6 +446,9 @@ public class PlayerControllerScripts : MonoBehaviour
                                     Transform tempTarget = collider.GetComponent<MoveTrigger>().targetPosition;
                                     playerRigidbody2D.position = new Vector2(tempTarget.position.x, tempTarget.position.y);
                                     //playerRigidbody2D.MovePosition(new Vector2(tempTarget.position.x, tempTarget.position.y));
+                                    playerRigidbody2D.velocity = Vector2.zero;
+
+                                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_portalMove], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_portalMove].clip);
                                 }
                                 else if (trigger.moveTrigger == MOVE_TRIGGER.MOVE_NEXTSTAGE)
                                 {
@@ -447,6 +462,8 @@ public class PlayerControllerScripts : MonoBehaviour
             }       
         }
     }
+
+
 
     public void ShowDamageText(int damageNumber)
     {
