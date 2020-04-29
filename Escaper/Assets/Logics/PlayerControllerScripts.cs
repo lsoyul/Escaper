@@ -119,6 +119,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
     private void Update() {
         Time.timeScale = timescale;
+        
         if (timescale < 1.0f) Time.fixedDeltaTime = slowDownTimescale * timescale * GameStatics.fixedDeltaOffset;
         else Time.fixedDeltaTime = initFixedDeltaTime;
 
@@ -313,8 +314,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
         if (groundHit)
         {
-            if (groundHit.collider.tag == "Platform"
-                || groundHit.collider.tag == "MovingPlatform")
+            if (groundHit.collider.tag != "MoveTrigger")
             {
                 groundCollideObject = groundHit.collider;
                 return true;
@@ -550,13 +550,18 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             // Revive!
             isFainting = false;
-            StartCoroutine(TriggerOverWhelming(this.unbeatableDuration_revive));
+            if (this.gameObject.activeInHierarchy) StartCoroutine(TriggerOverWhelming(this.unbeatableDuration_revive));
         }
     }
 
     public Rigidbody2D GetPlayerRigidBody()
     {
         return playerRigidbody2D;
+    }
+
+    public bool IsGround()
+    {
+        return isGround;
     }
 
     void OnClickReturnButton()

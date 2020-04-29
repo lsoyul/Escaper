@@ -6,6 +6,8 @@ using UnityEngine.Playables;
 
 public class CutSceneControl : MonoBehaviour
 {
+    public Camera cam;
+    private float CameraInitOrthogonalSize = 90f;
     public PlayableDirector playableDirector;
 
     public GameStatics.SCENE_INDEX nextTargetScene;
@@ -15,6 +17,26 @@ public class CutSceneControl : MonoBehaviour
 
     public TweenAlpha touchGuideTweenAlpha;
     private bool touchOn = false;
+
+    private void Start()
+    {
+        // -- Camera Init --
+
+        // 9 x 16
+        // 1400 x 800 : cameraOrthogonalInitialSize
+        //float screenRatio = (float)Screen.width / (float)Screen.height;
+        //float targetRatio = 9f / 16f;
+        //if (screenRatio >= targetRatio)
+        //{
+        //    cam.orthographicSize = CameraInitOrthogonalSize;
+        //}
+        //else
+        //{
+        //    float differenceInSize = targetRatio / screenRatio;
+        //    cam.orthographicSize = CameraInitOrthogonalSize * differenceInSize;
+        //}
+        // -- Camera Init --
+    }
 
     /// <summary>
     /// Update is called every frame, if the MonoBehaviour is enabled.

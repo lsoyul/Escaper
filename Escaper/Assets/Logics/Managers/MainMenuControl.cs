@@ -13,6 +13,8 @@ public class MainMenuControl : MonoBehaviour
     public Light2D global2DLight;
     public Light2D light1;
     public GameObject mainTitle;
+
+    public Camera cam;
     
     [Header("- Animation -")]
     public TweenValue light1_intensityTween;
@@ -58,7 +60,22 @@ public class MainMenuControl : MonoBehaviour
     }
     void Start()
     {
-        //Btn_Logout.SetActive(false);
+        // -- Camera Init --
+
+        // 9 x 16
+        // 1400 x 800 : cameraOrthogonalInitialSize
+        float screenRatio = (float)Screen.width / (float)Screen.height;
+        float targetRatio = 9f / 16f;
+        if (screenRatio >= targetRatio)
+        {
+            cam.orthographicSize = 160f;
+        }
+        else
+        {
+            float differenceInSize = targetRatio / screenRatio;
+            cam.orthographicSize = 160f * differenceInSize;
+        }
+        // -- Camera Init --
 
         Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
         Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
@@ -107,6 +124,7 @@ public class MainMenuControl : MonoBehaviour
 
         mainTitle_transformTween.TweenCompleted += () => {
             isEndAnimating = true;
+            TopMostControl.Instance().SettingShowButton.SetActive(true);
         };
 
         

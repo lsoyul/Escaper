@@ -103,6 +103,7 @@ public class TopMostControl : MonoBehaviour
             topCanvas.sortingOrder = 10;
 
             ReturnButton.SetActive(true);
+            SettingShowButton.SetActive(true);
 
             // #### TEST
             testscript.gameObject.SetActive(true);
@@ -114,6 +115,7 @@ public class TopMostControl : MonoBehaviour
             topCanvas.sortingOrder = 0;
 
             ReturnButton.SetActive(false);
+            SettingShowButton.SetActive(false);
 
             testscript.gameObject.SetActive(false);
         }
@@ -283,11 +285,20 @@ public class TopMostControl : MonoBehaviour
         isShowingSecondWind = isShow;
     }
 
-    public void OnClick_GO_MainMenu()
+    public void OnClick_GO_Back()
     {
-        GameOver(false);
-        StartChangeScene(SCENE_INDEX.MAINMENU, true);
-        if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.MAINMENU);
+        OnClickSettingHide();
+        if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.GAMESTAGE)
+        {
+            if (isShowingUpgradeUI) GameOver(false);
+            StartChangeScene(SCENE_INDEX.MAINMENU, true);
+            if (onClickGameOverMenu != null) onClickGameOverMenu(MENU_GAMEOVER.MAINMENU);
+        }
+        else if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.MAINMENU)
+        {
+            // Application Quit
+            Application.Quit();
+        }
     }
     public void OnClick_GO_Retry()
     {
@@ -316,6 +327,8 @@ public class TopMostControl : MonoBehaviour
     private Vector3 outXPos_upgradeUI = new Vector3(900, 225, 0);
     private Vector3 inXPos_upgradeUI = new Vector3(0, 225, 0);
 
+    public bool isShowingUpgradeUI = false;
+
     public System.Action onClickReturn;
 
     public void ShowUpgradeUI(bool isShow)
@@ -342,6 +355,8 @@ public class TopMostControl : MonoBehaviour
 
             currentGameUIStatus = TOPUI_STATUS.NORMAL;
         }
+
+        isShowingUpgradeUI = isShow;
         upgradeUITweener.Begin();
         upgradeUITweener.defaultVector = upgradeUITweener.startingVector;
     }
@@ -403,6 +418,8 @@ public class TopMostControl : MonoBehaviour
     #endregion
 
     #region ### Portal Purchase UI ###
+
+    [Header("- Portal Purchase UI -")]
 
     public bool IsShowingPortalPurchaseUI = false;
     public bool IsCollidingPortalPurchase = false;
@@ -564,6 +581,70 @@ public class TopMostControl : MonoBehaviour
             }
             else SubTitles[i].SetActive(false);
         }
+    }
+
+    #endregion
+
+    #region #### Setting Control ####
+
+    [Header("- Setting Control -")]
+
+    public GameObject SettingShowButton;
+    public UnityEngine.UI.Text SettingGoBackText; 
+    public TweenTransforms SettingControlTweenTrans;
+
+    private Vector3 outXPos_SettingControl = new Vector3(-900, 0, 0);
+    private Vector3 inXPos_SettingControl = new Vector3(0, 0, 0);
+
+    public bool IsSettingState = false;
+
+    public void OnClickSettingShow()
+    {
+        bool possibleSettingShow = false;
+
+        if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.MAINMENU) possibleSettingShow = true;
+        else if ((SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.GAMESTAGE) && PlayerManager.Instance().GetPlayerControl().IsGround()) possibleSettingShow = true;
+
+        if (possibleSettingShow)
+        {
+            topCanvas.sortingOrder = 10;
+
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
+
+            IsSettingState = true;
+            SettingControlTweenTrans.gameObject.SetActive(true);
+            SettingControlTweenTrans.startingVector = outXPos_SettingControl;
+            SettingControlTweenTrans.endVector = inXPos_SettingControl;
+
+            if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.MAINMENU)
+            {
+                SettingGoBackText.text = "Exit Game";
+            }
+            else
+            {
+                SettingGoBackText.text = "Main Menu";
+            }
+
+            SettingControlTweenTrans.Begin();
+            SettingControlTweenTrans.defaultVector = SettingControlTweenTrans.startingVector;
+        }
+    }
+
+    public void OnClickSettingHide()
+    {
+        IsSettingState = false;
+        SettingControlTweenTrans.startingVector = inXPos_SettingControl;
+        SettingControlTweenTrans.endVector = outXPos_SettingControl;
+        SettingControlTweenTrans.TweenCompleted += SettingControlFadeoutFinish;
+
+        SettingControlTweenTrans.Begin();
+        SettingControlTweenTrans.defaultVector = SettingControlTweenTrans.startingVector;
+    }
+
+    void SettingControlFadeoutFinish()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.MAINMENU) topCanvas.sortingOrder = 0;
+        SettingControlTweenTrans.TweenCompleted -= SettingControlFadeoutFinish;
     }
 
     #endregion
