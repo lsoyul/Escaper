@@ -56,6 +56,7 @@ public class TopMostControl : MonoBehaviour
         }
         gameControlObj.SetActive(false);
         SoundManager.StopSoundsOnLevelLoad = false;
+
     }
 
     /// <summary>
@@ -64,6 +65,7 @@ public class TopMostControl : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+
     }
 
     /// <summary>
@@ -226,12 +228,19 @@ public class TopMostControl : MonoBehaviour
     public TweenTransforms secondWindTweenTrans;
     public UnityEngine.UI.Text shardsAmountsToRevive;
 
+    private int currentRequiredShardsAmounts = int.MaxValue;
+
     public GameObject NoMoreRevivePanel;
 
     private Vector3 outXPos_gameOverUI = new Vector3(900, -256, 0);
-    private Vector3 inXPos_gameOverUI = new Vector3(243, -256, 0);
+    private Vector3 inXPos_gameOverUI = new Vector3(293, -256, 0);
 
     public System.Action<MENU_GAMEOVER> onClickGameOverMenu;
+
+    public int GetRequiredShardsForRevive()
+    {
+        return currentRequiredShardsAmounts;
+    }
 
     public void GameOver(bool isShow)
     {
@@ -239,9 +248,15 @@ public class TopMostControl : MonoBehaviour
 
         if (PlayerManager.Instance().PlayerStatus.RemainReviveCount > 0)
         {
-            NoMoreRevivePanel.SetActive(false);
-
-            if (isShow) ShowSecondWind(true);
+            if (isShow)
+            {
+                if ((PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2) > 0)
+                    NoMoreRevivePanel.SetActive(false);
+                else
+                    NoMoreRevivePanel.SetActive(true);
+                
+                ShowSecondWind(true);
+            }
             else ShowSecondWind(false);
         }
         else
@@ -260,13 +275,14 @@ public class TopMostControl : MonoBehaviour
     {
         if (isShow)
         {
-            int shardsAmounts = PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2;
-            shardsAmountsToRevive.text = "-" + shardsAmounts.ToString();
+            currentRequiredShardsAmounts = PlayerManager.Instance().PlayerStatus.CurrentMemoryShards / 2;
+            shardsAmountsToRevive.text = "-" + currentRequiredShardsAmounts.ToString();
             secondWindTweenTrans.startingVector = outXPos_gameOverUI;
             secondWindTweenTrans.endVector = inXPos_gameOverUI;
         }
         else
         {
+            currentRequiredShardsAmounts = int.MaxValue;
             secondWindTweenTrans.startingVector = inXPos_gameOverUI;
             secondWindTweenTrans.endVector = outXPos_gameOverUI;
         }
@@ -429,8 +445,8 @@ public class TopMostControl : MonoBehaviour
 
     public GameObject NoPortalPurchasePanel;
 
-    private Vector3 outXPos_portalPurchaseUI = new Vector3(-900, -549, 0);
-    private Vector3 inXPos_portalPurchaseUI = new Vector3(-243, -549, 0);
+    private Vector3 outXPos_portalPurchaseUI = new Vector3(900, -549, 0);
+    private Vector3 inXPos_portalPurchaseUI = new Vector3(293, -549, 0);
 
     public MoveTrigger currentSelectedPortalTrigger;
 
@@ -441,8 +457,10 @@ public class TopMostControl : MonoBehaviour
             // Show PortalPurchase
             portalPurchaseTweenTrans.gameObject.SetActive(true);
 
-            portalPurchaseTweenTrans.startingVector = portalPurchaseTweenTrans.transform.localPosition;
-            portalPurchaseTweenTrans.endVector = inXPos_portalPurchaseUI;
+            //portalPurchaseTweenTrans.startingVector = portalPurchaseTweenTrans.transform.localPosition;
+            //portalPurchaseTweenTrans.endVector = inXPos_portalPurchaseUI;
+
+            portalPurchaseTweenTrans.gameObject.transform.localPosition = inXPos_portalPurchaseUI;
 
             shardsAmountsToOpenPortal.text = GameStatics.GetPortalOpenCost(moveTrigger.portalType).ToString();
             CheckPortalPurchaseCostBlock(moveTrigger.portalType);
@@ -456,10 +474,12 @@ public class TopMostControl : MonoBehaviour
 
             NoPortalPurchasePanel.SetActive(true);
             currentSelectedPortalTrigger = null;
+
+            portalPurchaseTweenTrans.duration = 0.4f;
+            portalPurchaseTweenTrans.Begin();
+            portalPurchaseTweenTrans.defaultVector = portalPurchaseTweenTrans.startingVector;
         }
 
-        portalPurchaseTweenTrans.Begin();
-        portalPurchaseTweenTrans.defaultVector = portalPurchaseTweenTrans.startingVector;
 
         IsShowingPortalPurchaseUI = isShow;
     }
@@ -486,6 +506,7 @@ public class TopMostControl : MonoBehaviour
                 // Open the portal
                 PlayerManager.Instance().PlayerStatus.CurrentMemoryShards -= GameStatics.GetPortalOpenCost(currentSelectedPortalTrigger.portalType);
                 GameConfigs.SetPortalStatus(currentSelectedPortalTrigger.portalType, true);
+                GameConfigs.SetCurrentMemoryShards(PlayerManager.Instance().PlayerStatus.CurrentMemoryShards);
 
                 currentSelectedPortalTrigger.SetPortal(true);
 
@@ -645,6 +666,29 @@ public class TopMostControl : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.MAINMENU) topCanvas.sortingOrder = 0;
         SettingControlTweenTrans.TweenCompleted -= SettingControlFadeoutFinish;
+    }
+
+    public void OnChangePlayerStatus()
+    {
+        if (isShowingUpgradeUI)
+        {
+            // Update Upgrade UIs
+            SetUpgradeInfos(upgradeElements);
+        }
+
+        if (isShowingSecondWind)
+        {
+            // Update Second Wind UIs
+
+            if (currentRequiredShardsAmounts > PlayerManager.Instance().PlayerStatus.CurrentMemoryShards)
+            {
+                NoMoreRevivePanel.SetActive(true);
+            }
+            else
+            {
+                NoMoreRevivePanel.SetActive(false);
+            }
+        }
     }
 
     #endregion

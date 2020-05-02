@@ -151,9 +151,11 @@ public class GameConfigs
         {
             case GameStatics.PORTAL_TYPE.STAGE1_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage1_1, isOnInt);
+                portal_stage1_1 = isOnInt;
                 break;
             case GameStatics.PORTAL_TYPE.STAGE2_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage2_1, isOnInt);
+                portal_stage2_1 = isOnInt;
                 break;
             default:
                 break;

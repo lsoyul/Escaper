@@ -39,6 +39,7 @@ public class PlayerManager : MonoBehaviour
         playerStatus.onChangePlayerStatus += OnChangePlayerStatus;
 
         TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
+        onChangePlayerStatus += TopMostControl.Instance().OnChangePlayerStatus;
     }
 
     public static bool HasInstance()
@@ -225,8 +226,8 @@ public class PlayerManager : MonoBehaviour
                 if (PlayerStatus.RemainReviveCount > 0)
                 {
                     Vibration.Vibrate(100);
-                    PlayerStatus.CurrentMemoryShards = PlayerStatus.CurrentMemoryShards / 2;
-                    PlayerStatus.CurrentHP = PlayerStatus.MaxHP / 2;
+                    PlayerStatus.CurrentMemoryShards -= TopMostControl.Instance().GetRequiredShardsForRevive();
+                    PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
                     PlayerStatus.RemainReviveCount -= 1;
 
                     TopMostControl.Instance().StartGlobalLightEffect(Color.yellow, 2f, 0.2f);

@@ -72,7 +72,7 @@ public class CameraControlScript : MonoBehaviour {
         cam = this.GetComponent<Camera>();
 
         // 9 x 16
-        // 1400 x 800 : cameraOrthogonalInitialSize
+        // 1600 x 900 : cameraOrthogonalInitialSize
         float screenRatio = (float)Screen.width / (float)Screen.height;
         float targetRatio = 9f / 16f;
         if (screenRatio >= targetRatio){

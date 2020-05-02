@@ -12,7 +12,7 @@ public static class GameStatics
     public const double default_IncAirTimeDuration = 0.1f;
     public const double default_IncShardsPullDistance = 1f;
     public const int default_BaseMaxHP = 40;
-    public const double default_AirTimeDuration = 0.5f;
+    public const double default_AirTimeDuration = 1f;
     public const double default_ShardsPullDistance = 10.0f;
     // Ads sale ratio
     public const double default_MultiflyRatio = 1.5f;
@@ -182,7 +182,7 @@ public static class GameStatics
             case DAMAGED_TYPE.SPIKE:
                 return DAMAGE_BASIC_SPIKE * StageLoader.CurrentStage;
             case DAMAGED_TYPE.FALLING_GROUND:
-                return (PlayerManager.Instance().PlayerStatus.MaxHP / 2);
+                return (PlayerManager.Instance().PlayerStatus.MaxHP / 4);
             default:
                 return 0;
         }
