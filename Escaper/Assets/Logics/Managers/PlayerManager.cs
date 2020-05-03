@@ -183,6 +183,10 @@ public class PlayerManager : MonoBehaviour
                 TopMostControl.Instance().StartGlobalLightEffect(Color.red, 2f, 0.4f);
                 SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround].clip);
                 break;
+            case DAMAGED_TYPE.PROJECTILE_SHOOTER1:
+                TopMostControl.Instance().StartGlobalLightEffect(Color.red, 1f, 0.2f);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall].clip);
+                break;
             default:
                 break;
         }

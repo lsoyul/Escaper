@@ -125,13 +125,13 @@ public class CameraControlScript : MonoBehaviour {
     {
         switch (damagedType)
         {
-            case DAMAGED_TYPE.SPIKE:
-                Vibration.Vibrate(3);
-                CameraShake_Rot(2);
-                break;
             case DAMAGED_TYPE.FALLING_GROUND:
                 Vibration.Vibrate(5);
                 CameraShake_Rot(5);
+                break;
+            default:
+                Vibration.Vibrate(3);
+                CameraShake_Rot(2);
                 break;
         }
     }

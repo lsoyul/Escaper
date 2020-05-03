@@ -57,7 +57,13 @@ public static class GameStatics
     public enum DAMAGED_TYPE
     {
         SPIKE,
+        PROJECTILE_SHOOTER1,
         FALLING_GROUND
+    }
+
+    public enum PROJECTILE_TYPE
+    {
+        SHOOTER1,
     }
 
     public enum SHARD_TYPE
@@ -174,6 +180,7 @@ public static class GameStatics
     #region #### Damage Points ####
 
     private static int DAMAGE_BASIC_SPIKE = 10;
+    private static int DAMAGE_PROJECTILE1 = 20;
 
     public static int GetDamagePoints(DAMAGED_TYPE damageType)
     {
@@ -181,8 +188,12 @@ public static class GameStatics
         {
             case DAMAGED_TYPE.SPIKE:
                 return DAMAGE_BASIC_SPIKE * StageLoader.CurrentStage;
+            case DAMAGED_TYPE.PROJECTILE_SHOOTER1:
+                return DAMAGE_PROJECTILE1 * StageLoader.CurrentStage;
+                break;
             case DAMAGED_TYPE.FALLING_GROUND:
                 return (PlayerManager.Instance().PlayerStatus.MaxHP / 4);
+            
             default:
                 return 0;
         }

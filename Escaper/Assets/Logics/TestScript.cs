@@ -10,7 +10,7 @@ public class TestScript : MonoBehaviour
     public Text hpSkillLevelString;
     public Text coolSkilllevelString;
     public Text distanceSkillLevelString;
-
+    public Text stageString;
 
     public void OnClickMaxHP()
     {
@@ -47,5 +47,10 @@ public class TestScript : MonoBehaviour
     {
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE1_1, false);
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE2_1, false);
+    }
+
+    public void OnClickSetStage()
+    {
+        TopMostControl.Instance().StartChangeScene(GameStatics.SCENE_INDEX.GAMESTAGE, true, int.Parse(stageString.text));
     }
 }

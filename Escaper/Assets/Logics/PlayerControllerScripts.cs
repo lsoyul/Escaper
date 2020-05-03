@@ -459,6 +459,18 @@ public class PlayerControllerScripts : MonoBehaviour
                         }
                 }
                 break;
+                case "Projectile1":{
+                        if (canTriggerHurt && !reviveTime)
+                        {
+                            DirectionalProjectile proj = collider.GetComponent<DirectionalProjectile>();
+                            proj.HitSomething();
+
+                            damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
+                            StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
+                            PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.PROJECTILE_SHOOTER1);
+                        }
+                    }
+                break;
             }       
         }
     }
