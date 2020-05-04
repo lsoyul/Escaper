@@ -343,6 +343,36 @@ public class PlayerManager : MonoBehaviour
 
     #endregion
 
+    #region ### Hero Sprite Control ###
 
+    private PLAYER_SKIN currentPlayerSprite = PLAYER_SKIN.NORMAL;
+
+    public PLAYER_SKIN CurrentPlayerSprite
+    {
+        get { return currentPlayerSprite; }
+    }
+
+    public Action onChangePlayerSkin;
+
+    public void SetPlayerSkin(PLAYER_SKIN playerSkin)
+    {
+        currentPlayerSprite = playerSkin;
+        if (onChangePlayerSkin != null) onChangePlayerSkin();
+    }
+
+    //=== TESTCODE ===
+
+    [Header(" -- TEST CODE -- ")]
+    public PLAYER_SKIN SKIN_FORTEST;
+
+    [ContextMenu("ChangeSkin")]
+    void TEST_ChangeSkin()
+    {
+        SetPlayerSkin(SKIN_FORTEST);
+    }
+
+    //================
+
+    #endregion
 
 }

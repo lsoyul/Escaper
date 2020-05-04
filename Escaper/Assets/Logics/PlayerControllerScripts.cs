@@ -88,6 +88,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
         PlayerManager.Instance().onDeath += OnDeath;
         PlayerManager.Instance().onFinishAirTime += OnFinishAirTime;
+        PlayerManager.Instance().onChangePlayerSkin += OnChangePlayerSkin;
 
         TopMostControl.Instance().onClickReturn += OnClickReturnButton;
         TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
@@ -97,7 +98,8 @@ public class PlayerControllerScripts : MonoBehaviour
         EffectManager.GetInstance();
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         if (flickController != null)
         {
             flickController.onPointerUp -= OnPointerUp;
@@ -108,6 +110,7 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             PlayerManager.Instance().onDeath -= OnDeath;
             PlayerManager.Instance().onFinishAirTime -= OnFinishAirTime;
+            PlayerManager.Instance().onChangePlayerSkin -= OnChangePlayerSkin;
         }
 
         if (TopMostControl.HasInstance())
@@ -117,9 +120,10 @@ public class PlayerControllerScripts : MonoBehaviour
         }
     }
 
-    private void Update() {
+    private void Update()
+    {
         Time.timeScale = timescale;
-        
+
         if (timescale < 1.0f) Time.fixedDeltaTime = slowDownTimescale * timescale * GameStatics.fixedDeltaOffset;
         else Time.fixedDeltaTime = initFixedDeltaTime;
 
@@ -203,7 +207,7 @@ public class PlayerControllerScripts : MonoBehaviour
     {
         if (flickController.GetFlickedVector().magnitude > 1f && currentRemainJump > 0)
         {
-            if (isGround == false) 
+            if (isGround == false)
             {
                 PlayerManager.Instance().SetAirTimeFinish();
 
@@ -216,7 +220,7 @@ public class PlayerControllerScripts : MonoBehaviour
                 if (flickController.GetFlickedVector().magnitude >= 100f)
                 {
                     // Double Jump
-                    bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
+                    bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false;
 
                     Vector3 effTargetPos = Vector3.zero;
 
@@ -234,11 +238,11 @@ public class PlayerControllerScripts : MonoBehaviour
 
                     if (flickController.GetFlickedVector().magnitude >= 100f)
                     {
-                        bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false; 
+                        bool xReverse = (flickController.GetFlickedVector().x < 0) ? true : false;
 
                         Vector3 effTargetPos = groundCheckCenter.position;
                         effTargetPos.y = groundCheckCenter.position.y + 7.3f;
-                        
+
                         if (xReverse) effTargetPos.x = groundCheckCenter.position.x - 5f;
                         else effTargetPos.x = groundCheckCenter.position.x + 5f;
 
@@ -351,8 +355,8 @@ public class PlayerControllerScripts : MonoBehaviour
         if ((tVec.x < 0 && playerRigidbody2D.velocity.x > 0)
         || (tVec.x > 0 && playerRigidbody2D.velocity.x < 0))
         {
-            
-            if (isHurting == true) 
+
+            if (isHurting == true)
             {
                 if (playerRigidbody2D.velocity.x > 0) tVec.x = -Mathf.Abs(tVec.x);
                 else tVec.x = Mathf.Abs(tVec.x);
@@ -388,7 +392,7 @@ public class PlayerControllerScripts : MonoBehaviour
         Color t = textDamagedObject.color;
         t.a = textDamagedAlpha.value;
         textDamagedObject.color = t;
-    }   
+    }
 
     void ControlGroundCollide()
     {
@@ -421,20 +425,22 @@ public class PlayerControllerScripts : MonoBehaviour
 
         if (collider != null)
         {
-            switch(collider.tag)
+            switch (collider.tag)
             {
-                case "Damage_spike":{
-                    if (canTriggerHurt && !reviveTime)
+                case "Damage_spike":
                     {
-                        //Debug.Log("Damage_spike");
-                        //Debug.Log("---------------------Hit!");
-                        damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
-                        StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
-                        PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.SPIKE);                        
+                        if (canTriggerHurt && !reviveTime)
+                        {
+                            //Debug.Log("Damage_spike");
+                            //Debug.Log("---------------------Hit!");
+                            damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
+                            StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
+                            PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.SPIKE);
+                        }
                     }
-                }
-                break;
-                case "MoveTrigger":{
+                    break;
+                case "MoveTrigger":
+                    {
                         MoveTrigger trigger = collider.GetComponent<MoveTrigger>();
 
                         if (trigger != null)
@@ -457,9 +463,10 @@ public class PlayerControllerScripts : MonoBehaviour
                                 }
                             }
                         }
-                }
-                break;
-                case "Projectile1":{
+                    }
+                    break;
+                case "Projectile1":
+                    {
                         if (canTriggerHurt && !reviveTime)
                         {
                             DirectionalProjectile proj = collider.GetComponent<DirectionalProjectile>();
@@ -470,8 +477,8 @@ public class PlayerControllerScripts : MonoBehaviour
                             PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.PROJECTILE_SHOOTER1);
                         }
                     }
-                break;
-            }       
+                    break;
+            }
         }
     }
 
@@ -480,7 +487,7 @@ public class PlayerControllerScripts : MonoBehaviour
     public void ShowDamageText(int damageNumber)
     {
         textDamagedObject.gameObject.SetActive(true);
-        textDamagedObject.text = "-"+damageNumber.ToString();
+        textDamagedObject.text = "-" + damageNumber.ToString();
         textDamagedAlpha.Begin();
         textDamagedTransform.Begin();
 
@@ -497,7 +504,7 @@ public class PlayerControllerScripts : MonoBehaviour
         textDamagedAlpha.TweenCompleted -= HideDamageText;
     }
 
-    
+
 
     IEnumerator TriggerHurt(Collider2D collider, float unbeatableDuration)
     {
@@ -508,7 +515,7 @@ public class PlayerControllerScripts : MonoBehaviour
         timescale = 1.0f;
 
         // Controll Rigidbody
-        bool isLeftKnockback 
+        bool isLeftKnockback
         = (collider.transform.position.x > playerRigidbody2D.transform.position.x) ? true : false;
 
         float xKnockbackPower = Mathf.Abs(knockbackXPower);
@@ -621,5 +628,23 @@ public class PlayerControllerScripts : MonoBehaviour
         shardLight.StartBlink(0.5f, shardColor);
     }
 
+    private void LateUpdate()
+    {
+        var subSprites = Resources.LoadAll<Sprite>("Sprites/Hero/" + GameStatics.GetPlayerSpriteName(PlayerManager.Instance().CurrentPlayerSprite));
 
+        string oldSpriteName = playerRenderer.sprite.name;
+        var newSprite = Array.Find(subSprites, item => item.name == oldSpriteName);
+
+        if (newSprite) playerRenderer.sprite = newSprite;
+    }
+
+    void OnChangePlayerSkin()
+    {
+        //var subSprites = Resources.LoadAll<Sprite>("Sprites/Hero/" + GameStatics.GetPlayerSpriteName(PlayerManager.Instance().CurrentPlayerSprite));
+        //
+        //string oldSpriteName = playerRenderer.sprite.name;
+        //var newSprite = Array.Find(subSprites, item => item.name == oldSpriteName);
+        //
+        //if (newSprite) playerRenderer.sprite = newSprite;
+    }
 }

@@ -255,10 +255,38 @@ public static class GameStatics
 
     #region #### Animation Sprites name ####
 
-    public enum PLAYER_SPRITE
+    public enum PLAYER_SKIN
     {
         NORMAL,
-        TRUE_HERO
+        HERO_MINT,
+        HERO_8BIT,
+        HERO_COLD,
+        HERO_INSANE,
+        HERO_GRAY,
+        HERO_INVIS,
+    }
+
+    public static string GetPlayerSpriteName(PLAYER_SKIN playerSprite)
+    {
+        switch (playerSprite)
+        {
+            case PLAYER_SKIN.NORMAL:
+                return "Hero_Sheet";
+            case PLAYER_SKIN.HERO_MINT:
+                return "Hero_Sheet_mint";
+            case PLAYER_SKIN.HERO_8BIT:
+                return "Hero_Sheet_8bit";
+            case PLAYER_SKIN.HERO_COLD:
+                return "Hero_Sheet_cold";
+            case PLAYER_SKIN.HERO_INSANE:
+                return "Hero_Sheet_insane";
+            case PLAYER_SKIN.HERO_GRAY:
+                return "Hero_Sheet_gray";
+            case PLAYER_SKIN.HERO_INVIS:
+                return "Hero_Sheet_invis";
+            default:
+                return "Hero_Sheet";
+        }
     }
 
 
