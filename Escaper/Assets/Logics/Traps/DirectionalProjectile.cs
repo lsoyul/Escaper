@@ -33,6 +33,8 @@ public class DirectionalProjectile : MonoBehaviour
     {
         // Play Hit Effect
         // And Destroy this gameobject
+        EffectManager.GetInstance().playEffect(this.transform.position, GameStatics.EFFECT.Explosion1, Vector2.zero);
+
         this.gameObject.SetActive(false);
         Destroy(this.gameObject);
     }

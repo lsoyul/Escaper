@@ -347,6 +347,8 @@ public class PlayerManager : MonoBehaviour
 
     private PLAYER_SKIN currentPlayerSprite = PLAYER_SKIN.NORMAL;
 
+    public List<PLAYER_SKIN> PlayerHaveSkinList = new List<PLAYER_SKIN>();
+
     public PLAYER_SKIN CurrentPlayerSprite
     {
         get { return currentPlayerSprite; }

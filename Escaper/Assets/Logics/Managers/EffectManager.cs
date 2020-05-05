@@ -26,6 +26,7 @@ public class EffectManager : MonoBehaviour
         Resources.Load("Effects/Eff_jumpsmoke");
         Resources.Load("Effects/Eff_jumptwice");
         Resources.Load("Effects/Eff_MagicPillarBlastYellow");
+        Resources.Load("Effects/Eff_Explosion1");
     }
 
 
@@ -73,6 +74,11 @@ public class EffectManager : MonoBehaviour
                     go_eff.transform.parent = parent;
                     go_eff.transform.localPosition = targetPos;
                 }
+                break;
+            case GameStatics.EFFECT.Explosion1:
+
+                go_eff = Instantiate(Resources.Load("Effects/Eff_Explosion1"), targetPos, Quaternion.Euler(0, 0, 0)) as GameObject;
+
                 break;
         }
 

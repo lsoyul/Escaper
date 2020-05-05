@@ -51,7 +51,8 @@ public static class GameStatics
         JUMP_SMOKE,
         JUMP_TWICE,
         GET_SHARD,
-        YELLOW_PILLAR
+        YELLOW_PILLAR,
+        Explosion1,
     }
 
     public enum DAMAGED_TYPE
@@ -215,6 +216,7 @@ public static class GameStatics
     public const string sound_select     = "sound_select";
     public const string sound_timestop   = "sound_timestop";
     public const string sound_upgrade = "sound_upgrade";
+    public const string sound_trapFire1 = "sound_trapFire1";
     #endregion
 
     #region #### Warp Trigger ####
