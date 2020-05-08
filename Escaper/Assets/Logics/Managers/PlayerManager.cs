@@ -171,6 +171,7 @@ public class PlayerManager : MonoBehaviour
 
     public void OnDamaged(DAMAGED_TYPE damageType)
     {
+        SetAirTimeFinish();
         playerStatus.CurrentHP -= GameStatics.GetDamagePoints(damageType);
         playerController.ShowDamageText(GameStatics.GetDamagePoints(damageType));
         switch (damageType)

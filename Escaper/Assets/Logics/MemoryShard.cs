@@ -18,7 +18,7 @@ public class MemoryShard : MonoBehaviour
     private float chaseIncSpeed = 4f;
     private float chaseDefaultSpeed = 1f;
 
-    public float MAX_SPEED = 60f;
+    public float MAX_SPEED = 120f;
 
     public System.Action<MemoryShard> onGetShard;
 

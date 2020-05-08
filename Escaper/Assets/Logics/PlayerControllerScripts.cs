@@ -134,7 +134,7 @@ public class PlayerControllerScripts : MonoBehaviour
         // Touch Control
         if (flickController.GetIsHolding() && currentRemainJump > 0)
         {
-            if (!isFalling && !isFainting && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup") && !startDeathForUpgradeAct)
+            if (!isFainting && !playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("player_standup") && !startDeathForUpgradeAct)
             {
                 Vector2 endPos = playerRigidbody2D.transform.position;
                 endPos.x -= flickController.GetFlickedVector().x;
@@ -178,6 +178,7 @@ public class PlayerControllerScripts : MonoBehaviour
             isFalling = true;
         }
 
+
         ControlGroundCollide();
 
         UpdateAnimator();
@@ -209,8 +210,6 @@ public class PlayerControllerScripts : MonoBehaviour
         {
             if (isGround == false)
             {
-                PlayerManager.Instance().SetAirTimeFinish();
-
                 playerRigidbody2D.velocity = Vector2.zero;
                 playerRigidbody2D.AddForce(-flickController.GetFlickedVector(), ForceMode2D.Impulse);
 
@@ -254,6 +253,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
         }
 
+        PlayerManager.Instance().SetAirTimeFinish();
         airJumpLight.Hide();
 
         currentRemainJump -= 1;
@@ -262,7 +262,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
     void OnPointerDown()
     {
-        if (!isFalling && !isFainting && !startDeathForUpgradeAct)
+        if (!isFainting && !startDeathForUpgradeAct)
         {
             if (currentRemainJump > 0 && isGround == false && isHurting == false)
             {
@@ -636,6 +636,12 @@ public class PlayerControllerScripts : MonoBehaviour
         var newSprite = Array.Find(subSprites, item => item.name == oldSpriteName);
 
         if (newSprite) playerRenderer.sprite = newSprite;
+
+
+        if (isFalling)
+        {
+            if (playerRigidbody2D.velocity.y >= 0) isFalling = false;
+        }
     }
 
     void OnChangePlayerSkin()
