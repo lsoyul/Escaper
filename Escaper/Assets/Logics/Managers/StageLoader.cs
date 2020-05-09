@@ -125,10 +125,10 @@ public class StageLoader : MonoBehaviour
             {
                 GameStatics.SHARD_TYPE shardType = GameStatics.SHARD_TYPE.EFFECT;
 
-                if (stageIndex == 0) shardType = GameStatics.SHARD_TYPE.SHARD1;
-                else if (stageIndex == 1) shardType = GameStatics.SHARD_TYPE.SHARD2;
-                
-                
+                //if (stageIndex == 0) shardType = GameStatics.SHARD_TYPE.SHARD1;
+                //else if (stageIndex == 1) shardType = GameStatics.SHARD_TYPE.SHARD2;
+
+                shardType = GameStatics.SHARD_TYPE.SHARD1;
 
                 ms.SetShard(
                     shardType, 

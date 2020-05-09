@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DirectionalProjectile : MonoBehaviour
 {
+    public GameObject spriteImage;
     private float speed = 0f;
     private GameStatics.PROJECTILE_TYPE projectileType;
 
@@ -18,14 +19,16 @@ public class DirectionalProjectile : MonoBehaviour
     {
         this.speed = speed;
         this.projectileType = projectileType;
+        float fireAngle = this.transform.localRotation.z + 45;
+        spriteImage.transform.localRotation = Quaternion.Euler(0, 0, fireAngle);
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (isCollide == false)
         {
-            this.transform.Translate(this.transform.up * speed * Time.deltaTime, Space.World);
+            this.transform.Translate(this.transform.up * speed * Time.fixedDeltaTime, Space.World);
         }
     }
 

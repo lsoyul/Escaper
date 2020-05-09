@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DigitalRuby.SoundManagerNamespace;
+using UnityEngine.Experimental.Rendering.Universal;
 
 public class TrapShooter : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class TrapShooter : MonoBehaviour
     public SpriteRenderer bodySprite;
 
     public GameObject projectile;
+    public GameStatics.PROJECTILE_TYPE projectileType;
     public float activateOnDistance = 700f;
 
     public pattern[] shootDelayPattern;
@@ -23,12 +25,25 @@ public class TrapShooter : MonoBehaviour
     [Header("- Following ? -")]
     public bool IsFollowPlayer = false;
 
+    [Header("- GuideLight ? -")]
+    public Light2D shootGuideLight;
+    public float maxOuterAngle = 100;
+    public float maxIntensity = 3;
+
     private float currentTimer;
     private int currentPatternIndex = 0;
 
     private void Start()
     {
         projectile.gameObject.SetActive(false);
+
+        if (shootGuideLight != null)
+        {
+            shootGuideLight.gameObject.SetActive(true);
+            shootGuideLight.pointLightOuterRadius = activateOnDistance;
+            shootGuideLight.pointLightOuterAngle = maxOuterAngle;
+            shootGuideLight.intensity = 0;
+        }
     }
 
     void Update()
@@ -43,6 +58,8 @@ public class TrapShooter : MonoBehaviour
 
                 // Sprite Color Warning
                 SpriteColorWarning(currentTimer, shootDelayPattern[currentPatternIndex].delay);
+                // Light Shoot Guide
+                LightGuideWarning(currentTimer, shootDelayPattern[currentPatternIndex].delay);
 
                 if (currentTimer >= shootDelayPattern[currentPatternIndex].delay)
                 {
@@ -50,7 +67,8 @@ public class TrapShooter : MonoBehaviour
                     GameObject go = Instantiate(projectile.gameObject, this.transform.position + (this.transform.up * 10), this.transform.localRotation) as GameObject;
                     go.SetActive(true);
                     DirectionalProjectile proj = go.GetComponent<DirectionalProjectile>();
-                    proj.Fire(shootDelayPattern[currentPatternIndex].speed, GameStatics.PROJECTILE_TYPE.SHOOTER1);
+
+                    proj.Fire(shootDelayPattern[currentPatternIndex].speed, projectileType);
 
                     currentTimer = 0;
 
@@ -71,7 +89,16 @@ public class TrapShooter : MonoBehaviour
                     this.transform.up = followDirection;
                 }
             }
+
         }
+        else
+        {
+            if (shootGuideLight != null)
+            {
+                shootGuideLight.intensity = 0;
+            }
+        }
+
     }
 
 
@@ -107,5 +134,17 @@ public class TrapShooter : MonoBehaviour
         warnColor.b = ratio;
 
         bodySprite.color = warnColor;
+    }
+
+    void LightGuideWarning(float currentTimer, float delayTime)
+    {
+        if (shootGuideLight != null)
+        {
+            float ratio = currentTimer / delayTime;
+
+            shootGuideLight.pointLightOuterRadius = activateOnDistance;
+            shootGuideLight.pointLightOuterAngle = maxOuterAngle * (1f - ratio);
+            shootGuideLight.intensity = maxIntensity * ratio;
+        }
     }
 }

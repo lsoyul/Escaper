@@ -188,6 +188,10 @@ public class PlayerManager : MonoBehaviour
                 TopMostControl.Instance().StartGlobalLightEffect(Color.red, 1f, 0.2f);
                 SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall].clip);
                 break;
+            case DAMAGED_TYPE.PROJECTILE_SHOOTER2:
+                TopMostControl.Instance().StartGlobalLightEffect(Color.red, 1f, 0.2f);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall].clip);
+                break;
             default:
                 break;
         }
@@ -284,7 +288,8 @@ public class PlayerManager : MonoBehaviour
 
     public void OnGetShard(MemoryShard shard)
     {
-        if (shard.GetShardType() == SHARD_TYPE.SHARD1)
+        if (shard.GetShardType() == SHARD_TYPE.SHARD1
+            || shard.GetShardType() == SHARD_TYPE.SHARD2)
         {
             PlayerStatus.CurrentMemoryShards +=
                 (int)(StageLoader.Instance().GetRandomShard(shard.GetShardType()) * StageLoader.Instance().GetShardMultifly());

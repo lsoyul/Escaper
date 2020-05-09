@@ -119,7 +119,7 @@ public class PlayerControllerScripts : MonoBehaviour
             TopMostControl.Instance().onClickGameOverMenu -= OnClickGameOverMenu;
         }
     }
-
+    bool beforeGround;
     private void Update()
     {
         Time.timeScale = timescale;
@@ -127,9 +127,6 @@ public class PlayerControllerScripts : MonoBehaviour
         if (timescale < 1.0f) Time.fixedDeltaTime = slowDownTimescale * timescale * GameStatics.fixedDeltaOffset;
         else Time.fixedDeltaTime = initFixedDeltaTime;
 
-        bool beforeGround = isGround;
-
-        isGround = CheckGround();
 
         // Touch Control
         if (flickController.GetIsHolding() && currentRemainJump > 0)
@@ -168,38 +165,7 @@ public class PlayerControllerScripts : MonoBehaviour
             //Eff_jumpCharge.SetActive(false);
         }
 
-        if (playerRigidbody2D.velocity.y < minimumYSpeed)
-        {
-            // FAlling state
-            Vector2 t = playerRigidbody2D.velocity;
-            t.y = minimumYSpeed;
-            playerRigidbody2D.velocity = t;
 
-            isFalling = true;
-        }
-
-
-        ControlGroundCollide();
-
-        UpdateAnimator();
-
-        // Grounded Just Timing Callback
-        if (beforeGround == false)
-        {
-            if (isGround == true)
-            {
-                if (isFalling)
-                {
-                    damagedLight.StartBlink(1.0f, Color.red);
-                    PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
-                    isFainting = true;
-                    isFalling = false;
-                }
-
-                PlayerManager.Instance().OnGround();
-            }
-
-        }
     }
 
 
@@ -478,6 +444,19 @@ public class PlayerControllerScripts : MonoBehaviour
                         }
                     }
                     break;
+                case "Projectile2":
+                    {
+                        if (canTriggerHurt && !reviveTime)
+                        {
+                            DirectionalProjectile proj = collider.GetComponent<DirectionalProjectile>();
+                            proj.HitSomething();
+
+                            damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
+                            StartCoroutine(TriggerHurt(collider, this.unbeatableDuration_hurt));
+                            PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.PROJECTILE_SHOOTER2);
+                        }
+                    }
+                    break;
             }
         }
     }
@@ -638,10 +617,48 @@ public class PlayerControllerScripts : MonoBehaviour
         if (newSprite) playerRenderer.sprite = newSprite;
 
 
+        beforeGround = isGround;
+
+        isGround = CheckGround();
+
+        if (playerRigidbody2D.velocity.y < minimumYSpeed)
+        {
+            // FAlling state
+            Vector2 t = playerRigidbody2D.velocity;
+            t.y = minimumYSpeed;
+            playerRigidbody2D.velocity = t;
+
+            isFalling = true;
+        }
+
+
+        ControlGroundCollide();
+
+        UpdateAnimator();
+
+        // Grounded Just Timing Callback
+        if (beforeGround == false)
+        {
+            if (isGround == true)
+            {
+                if (isFalling)
+                {
+                    damagedLight.StartBlink(1.0f, Color.red);
+                    PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
+                    isFainting = true;
+                    isFalling = false;
+                }
+
+                PlayerManager.Instance().OnGround();
+            }
+
+        }
+
         if (isFalling)
         {
             if (playerRigidbody2D.velocity.y >= 0) isFalling = false;
         }
+
     }
 
     void OnChangePlayerSkin()

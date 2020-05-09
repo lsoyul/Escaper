@@ -59,6 +59,7 @@ public static class GameStatics
     {
         SPIKE,
         PROJECTILE_SHOOTER1,
+        PROJECTILE_SHOOTER2,
         FALLING_GROUND
     }
 
@@ -182,6 +183,7 @@ public static class GameStatics
 
     private static int DAMAGE_BASIC_SPIKE = 10;
     private static int DAMAGE_PROJECTILE1 = 20;
+    private static int DAMAGE_PROJECTIlE2 = 30;
 
     public static int GetDamagePoints(DAMAGED_TYPE damageType)
     {
@@ -190,8 +192,9 @@ public static class GameStatics
             case DAMAGED_TYPE.SPIKE:
                 return DAMAGE_BASIC_SPIKE * StageLoader.CurrentStage;
             case DAMAGED_TYPE.PROJECTILE_SHOOTER1:
-                return DAMAGE_PROJECTILE1 * StageLoader.CurrentStage;
-                break;
+                return DAMAGE_PROJECTILE1;
+            case DAMAGED_TYPE.PROJECTILE_SHOOTER2:
+                return DAMAGE_PROJECTIlE2;
             case DAMAGED_TYPE.FALLING_GROUND:
                 return (PlayerManager.Instance().PlayerStatus.MaxHP / 4);
             

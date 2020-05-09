@@ -107,6 +107,11 @@ public class TopMostControl : MonoBehaviour
             ReturnButton.SetActive(true);
             SettingShowButton.SetActive(true);
 
+            if (StageLoader.CurrentStage == 1)
+            {
+                PlayerManager.Instance().playerController.isFainting = true;
+            }
+
             // #### TEST
             testscript.gameObject.SetActive(true);
         }
@@ -445,8 +450,8 @@ public class TopMostControl : MonoBehaviour
 
     public GameObject NoPortalPurchasePanel;
 
-    private Vector3 outXPos_portalPurchaseUI = new Vector3(900, -549, 0);
-    private Vector3 inXPos_portalPurchaseUI = new Vector3(293, -549, 0);
+    private Vector3 outXPos_portalPurchaseUI = new Vector3(-900, -549, 0);
+    private Vector3 inXPos_portalPurchaseUI = new Vector3(-293, -549, 0);
 
     public MoveTrigger currentSelectedPortalTrigger;
 
