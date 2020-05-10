@@ -251,6 +251,8 @@ public static class GameStatics
                 return 0;
             case 2:
                 return -51f;
+            case 3:
+                return -51f;
             default:
                 return 0;
         }

@@ -149,6 +149,10 @@ public class TopMostControl : MonoBehaviour
                 {
                     SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Stage2"], 1.0f, 1.0f, true);
                 }
+                else if (StageLoader.CurrentStage == 3)
+                {
+                    SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Stage3"], 1.0f, 1.0f, true);
+                }
                 break;
 
             default:
