@@ -72,8 +72,4 @@ public class PlayerStatus
 		if (onChangePlayerStatus != null) onChangePlayerStatus();
 	}
 
-	public void SavePlayerMemoryShards()
-	{
-		GameConfigs.SetCurrentMemoryShards(currentMemoryShards);
-	}
 }

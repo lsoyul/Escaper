@@ -53,4 +53,9 @@ public class TestScript : MonoBehaviour
     {
         TopMostControl.Instance().StartChangeScene(GameStatics.SCENE_INDEX.GAMESTAGE, true, int.Parse(stageString.text));
     }
+
+    public void OnClickChangeRandomSkin()
+    {
+        PlayerManager.Instance().TEST_SetRandomSkin();
+    }
 }

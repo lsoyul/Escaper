@@ -424,6 +424,7 @@ public class PlayerControllerScripts : MonoBehaviour
                                 }
                                 else if (trigger.moveTrigger == MOVE_TRIGGER.MOVE_NEXTSTAGE)
                                 {
+                                    GameConfigs.SetCurrentMemoryShards(PlayerManager.Instance().PlayerStatus.CurrentMemoryShards);
                                     TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMESTAGE, true, StageLoader.CurrentStage + 1);
                                     trigger.TriggerOn = false;
                                 }

@@ -14,6 +14,7 @@ public class FlickController : MonoBehaviour
     public System.Action onPointerDown;
     public System.Action onPointerUp;
 
+
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
@@ -75,6 +76,7 @@ public class FlickController : MonoBehaviour
     bool CheckControllableStatus()
     {
         if (PlayerManager.Instance().IsDead) return false;
+        if (TopMostControl.Instance().GetIsSceneChanging() == true) return false;
 
         return true;
     }

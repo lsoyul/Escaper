@@ -351,7 +351,7 @@ public class PlayerManager : MonoBehaviour
 
     #region ### Hero Sprite Control ###
 
-    private PLAYER_SKIN currentPlayerSprite = PLAYER_SKIN.NORMAL;
+    private PLAYER_SKIN currentPlayerSprite = PLAYER_SKIN.HERO_MINT;
 
     public List<PLAYER_SKIN> PlayerHaveSkinList = new List<PLAYER_SKIN>();
 
@@ -377,6 +377,12 @@ public class PlayerManager : MonoBehaviour
     void TEST_ChangeSkin()
     {
         SetPlayerSkin(SKIN_FORTEST);
+    }
+
+    public void TEST_SetRandomSkin()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, 7);
+        SetPlayerSkin((PLAYER_SKIN)randomIndex);
     }
 
     //================
