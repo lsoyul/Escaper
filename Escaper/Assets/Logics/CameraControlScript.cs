@@ -99,6 +99,17 @@ public class CameraControlScript : MonoBehaviour {
             if (targetPos.x > levelMaxXAxis) targetPos.x = levelMaxXAxis;
         }
 
+        // Stage3 Last Camera Move
+        if (StageLoader.CurrentStage == 3)
+        {
+            if (player.transform.position.y > 1715 &&
+                player.transform.position.x > -3)
+            {
+                targetPos.x = 82;
+                targetPos.y = 1718;
+            }
+        }
+
         // Check Upgrade Status
         if (TopMostControl.Instance().GetGameUIStatus() == TOPUI_STATUS.GAMEOVER)
         {
