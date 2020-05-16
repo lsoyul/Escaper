@@ -24,6 +24,7 @@ public class TrapShooter : MonoBehaviour
 
     [Header("- Following ? -")]
     public bool IsFollowPlayer = false;
+    public bool IsShootDownward = false;
 
     [Header("- GuideLight ? -")]
     public Light2D shootGuideLight;
@@ -110,7 +111,15 @@ public class TrapShooter : MonoBehaviour
                  < activateOnDistance)
             {
                 // Activate Trap
-                activatingTrap = true;
+                if (IsShootDownward)
+                {
+                    if (this.transform.position.y < PlayerManager.Instance().GetPlayerControl().GetPlayerRigidBody().transform.position.y) activatingTrap = false;
+                    else activatingTrap = true;
+                }
+                else
+                {
+                    activatingTrap = true;
+                }
             }
             else
             {

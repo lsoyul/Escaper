@@ -108,6 +108,7 @@ public static class GameStatics
         NONE,
         STAGE1_1,
         STAGE2_1,
+        STAGE3_1,
     }
 
     #region #### Logics ####
@@ -235,9 +236,11 @@ public static class GameStatics
         switch (portalType)
         {
             case PORTAL_TYPE.STAGE1_1:
-                return 2000;
+                return 1500;
             case PORTAL_TYPE.STAGE2_1:
-                return 5000;
+                return 2500;
+            case PORTAL_TYPE.STAGE3_1:
+                return 3500;
             default:
                 return 0;
         }
@@ -319,6 +322,7 @@ public static class GameStatics
 
     public const string PREFS_PORTAL_Stage1_1 = "PREFS_PORTAL_Stage1_1";
     public const string PREFS_PORTAL_Stage2_1 = "PREFS_PORTAL_Stage2_1";
+    public const string PREFS_PORTAL_Stage3_1 = "PREFS_PORTAL_Stage3_1";
 
     #endregion
 }

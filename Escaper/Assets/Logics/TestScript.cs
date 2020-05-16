@@ -40,6 +40,7 @@ public class TestScript : MonoBehaviour
     {
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE1_1, true);
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE2_1, true);
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE3_1, true);
     }
 
 
@@ -47,6 +48,7 @@ public class TestScript : MonoBehaviour
     {
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE1_1, false);
         GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE2_1, false);
+        GameConfigs.SetPortalStatus(GameStatics.PORTAL_TYPE.STAGE3_1, false);
     }
 
     public void OnClickSetStage()

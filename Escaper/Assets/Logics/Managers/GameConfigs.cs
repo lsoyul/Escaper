@@ -18,6 +18,7 @@ public class GameConfigs
 
     private static int portal_stage1_1 = 0;
     private static int portal_stage2_1 = 0;
+    private static int portal_stage3_1 = 0;
 
     #endregion
 
@@ -35,6 +36,8 @@ public class GameConfigs
                 return (portal_stage1_1 == 0) ? false : true;
             case GameStatics.PORTAL_TYPE.STAGE2_1:
                 return (portal_stage2_1 == 0) ? false : true;
+            case GameStatics.PORTAL_TYPE.STAGE3_1:
+                return (portal_stage3_1 == 0) ? false : true;
             default:
                 return false;
         }
@@ -156,6 +159,10 @@ public class GameConfigs
             case GameStatics.PORTAL_TYPE.STAGE2_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage2_1, isOnInt);
                 portal_stage2_1 = isOnInt;
+                break;
+            case GameStatics.PORTAL_TYPE.STAGE3_1:
+                PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage3_1, isOnInt);
+                portal_stage3_1 = isOnInt;
                 break;
             default:
                 break;
