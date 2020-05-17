@@ -60,6 +60,7 @@ public static class GameStatics
         SPIKE,
         PROJECTILE_SHOOTER1,
         PROJECTILE_SHOOTER2,
+        EARTH_QUAKE,
         FALLING_GROUND
     }
 
@@ -196,6 +197,7 @@ public static class GameStatics
                 return DAMAGE_PROJECTILE1;
             case DAMAGED_TYPE.PROJECTILE_SHOOTER2:
                 return DAMAGE_PROJECTIlE2;
+            case DAMAGED_TYPE.EARTH_QUAKE:
             case DAMAGED_TYPE.FALLING_GROUND:
                 return (PlayerManager.Instance().PlayerStatus.MaxHP / 4);
             

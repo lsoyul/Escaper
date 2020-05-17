@@ -140,6 +140,9 @@ public class CameraControlScript : MonoBehaviour {
                 Vibration.Vibrate(5);
                 CameraShake_Rot(5);
                 break;
+            case DAMAGED_TYPE.EARTH_QUAKE:
+                // Already Shake at Trap pattern
+                break;
             default:
                 Vibration.Vibrate(3);
                 CameraShake_Rot(2);
@@ -171,7 +174,7 @@ public class CameraControlScript : MonoBehaviour {
             tweener.endVector = new Vector3(0, 0, 1);
             tweener.Begin();
             tweener.vector3Results = Vector3.zero;
-            yield return new WaitForSeconds(tweener.duration);
+            yield return new WaitForSecondsRealtime(tweener.duration);
         }
 
         // End Shake

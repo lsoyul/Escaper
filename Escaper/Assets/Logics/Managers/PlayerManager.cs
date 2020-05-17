@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 using System;
 using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
+using GooglePlayGames.BasicApi.Multiplayer;
+using TMPro;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -191,6 +193,10 @@ public class PlayerManager : MonoBehaviour
             case DAMAGED_TYPE.PROJECTILE_SHOOTER2:
                 TopMostControl.Instance().StartGlobalLightEffect(Color.red, 1f, 0.2f);
                 SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_hitWall].clip);
+                break;
+            case DAMAGED_TYPE.EARTH_QUAKE:
+                    TopMostControl.Instance().StartGlobalLightEffect(Color.red, 2f, 0.4f);
+                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround].clip);
                 break;
             default:
                 break;

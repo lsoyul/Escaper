@@ -6,6 +6,8 @@ using System;
 using static GameStatics;
 
 using DigitalRuby.SoundManagerNamespace;
+using Unity.Jobs;
+
 public class PlayerControllerScripts : MonoBehaviour
 {
     public FlickController flickController;
@@ -247,7 +249,7 @@ public class PlayerControllerScripts : MonoBehaviour
         }
         else
         {
-            if (isFainting && !isFalling && !startDeathForUpgradeAct)
+            if (isFainting && !isFalling && !startDeathForUpgradeAct && isGround)
             {
                 // Fainting on the ground
                 isFainting = false;
@@ -486,7 +488,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
 
 
-    IEnumerator TriggerHurt(Collider2D collider, float unbeatableDuration)
+    public IEnumerator TriggerHurt(Collider2D collider, float unbeatableDuration, bool isKnockback = true)
     {
         float timer = 0f;
         canTriggerHurt = false;
@@ -494,15 +496,26 @@ public class PlayerControllerScripts : MonoBehaviour
         currentRemainJump = 0;
         timescale = 1.0f;
 
-        // Controll Rigidbody
-        bool isLeftKnockback
-        = (collider.transform.position.x > playerRigidbody2D.transform.position.x) ? true : false;
+        if (isKnockback)
+        {
+            if (collider != null)
+            {
+                // Controll Rigidbody
+                bool isLeftKnockback
+                = (collider.transform.position.x > playerRigidbody2D.transform.position.x) ? true : false;
 
-        float xKnockbackPower = Mathf.Abs(knockbackXPower);
-        if (isLeftKnockback) xKnockbackPower = -xKnockbackPower;
+                float xKnockbackPower = Mathf.Abs(knockbackXPower);
+                if (isLeftKnockback) xKnockbackPower = -xKnockbackPower;
 
-        playerRigidbody2D.velocity = Vector2.zero;
-        playerRigidbody2D.AddForce(new Vector2(xKnockbackPower, knockbackYPower), ForceMode2D.Impulse);
+                playerRigidbody2D.velocity = Vector2.zero;
+                playerRigidbody2D.AddForce(new Vector2(xKnockbackPower, knockbackYPower), ForceMode2D.Impulse);
+            }
+            else
+            {
+                playerRigidbody2D.velocity = Vector2.zero;
+                playerRigidbody2D.AddForce(new Vector2(0, knockbackYPower / 2), ForceMode2D.Impulse);
+            }
+        }
 
         while (timer < unbeatableDuration)
         {
@@ -551,6 +564,13 @@ public class PlayerControllerScripts : MonoBehaviour
             isFainting = false;
             if (this.gameObject.activeInHierarchy) StartCoroutine(TriggerOverWhelming(this.unbeatableDuration_revive));
         }
+        //else
+        //{
+        //    if (isGround)
+        //    {
+        //        TopMostControl.Instance().GameOver(true);
+        //    }
+        //}
     }
 
     public Rigidbody2D GetPlayerRigidBody()
@@ -644,7 +664,8 @@ public class PlayerControllerScripts : MonoBehaviour
             {
                 if (isFalling)
                 {
-                    damagedLight.StartBlink(1.0f, Color.red);
+                    damagedLight.StartBlink(1.0f, Color.red); 
+                    StartCoroutine(TriggerHurt(null, this.unbeatableDuration_hurt, false));
                     PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
                     isFainting = true;
                     isFalling = false;
