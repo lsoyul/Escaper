@@ -6,7 +6,6 @@ using System;
 using static GameStatics;
 
 using DigitalRuby.SoundManagerNamespace;
-using Unity.Jobs;
 
 public class PlayerControllerScripts : MonoBehaviour
 {
@@ -98,6 +97,9 @@ public class PlayerControllerScripts : MonoBehaviour
         initFixedDeltaTime = Time.fixedDeltaTime;
 
         EffectManager.GetInstance();
+
+        textDamagedObject.GetComponent<MeshRenderer>().sortingLayerName = "Player";
+        textDamagedObject.GetComponent<MeshRenderer>().sortingOrder = 1;
     }
 
     private void OnDestroy()

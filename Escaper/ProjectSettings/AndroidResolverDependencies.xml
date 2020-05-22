@@ -1,5 +1,6 @@
 <dependencies>
   <packages>
+    <package>com.google.android.gms:play-services-ads:19.1.0</package>
     <package>com.google.firebase:firebase-analytics:17.2.2</package>
     <package>com.google.firebase:firebase-analytics-unity:6.13.0</package>
     <package>com.google.firebase:firebase-app-unity:6.13.0</package>
@@ -13,6 +14,7 @@
     <file>Assets/Plugins/Android/androidx.arch.core.core-common-2.0.0.jar</file>
     <file>Assets/Plugins/Android/androidx.arch.core.core-runtime-2.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.asynclayoutinflater.asynclayoutinflater-1.0.0.aar</file>
+    <file>Assets/Plugins/Android/androidx.browser.browser-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.collection.collection-1.0.0.jar</file>
     <file>Assets/Plugins/Android/androidx.coordinatorlayout.coordinatorlayout-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.core.core-1.0.0.aar</file>
@@ -36,7 +38,10 @@
     <file>Assets/Plugins/Android/androidx.swiperefreshlayout.swiperefreshlayout-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.versionedparcelable.versionedparcelable-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.viewpager.viewpager-1.0.0.aar</file>
+    <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-19.1.0.aar</file>
+    <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-base-19.1.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-identifier-17.0.0.aar</file>
+    <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-lite-19.1.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-18.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-api-phone-17.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-auth-base-17.0.0.aar</file>
@@ -44,6 +49,7 @@
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-basement-17.1.1.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-drive-17.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-games-19.0.0.aar</file>
+    <file>Assets/Plugins/Android/com.google.android.gms.play-services-gass-19.1.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-measurement-17.2.2.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-measurement-api-17.2.2.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-measurement-base-17.2.2.aar</file>
@@ -74,6 +80,7 @@
     <setting name="gradleBuildEnabled" value="True" />
     <setting name="gradleTemplateEnabled" value="False" />
     <setting name="installAndroidPackages" value="True" />
+    <setting name="localMavenRepoDir" value="Assets/GeneratedLocalRepo" />
     <setting name="packageDir" value="Assets/Plugins/Android" />
     <setting name="patchAndroidManifest" value="True" />
     <setting name="patchMainTemplateGradle" value="True" />

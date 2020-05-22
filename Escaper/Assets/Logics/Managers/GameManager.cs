@@ -7,7 +7,7 @@ using System;
 // Use Google Play Services
 //using GooglePlayGames;
 //using GooglePlayGames.BasicApi;
-
+using GoogleMobileAds.Api;
 using DigitalRuby.SoundManagerNamespace;
 
 public class GameManager : MonoBehaviour
@@ -61,8 +61,9 @@ public class GameManager : MonoBehaviour
 
         currentGameStatus = GameStatics.GAME_STATUS.NONE;
         ChangeGameStatus(GameStatics.GAME_STATUS.SPLASH);
+
     }
-    
+
     void Start()
     {
         Input.multiTouchEnabled = false;
@@ -78,6 +79,7 @@ public class GameManager : MonoBehaviour
         }
 
         InitializeFireBase();
+        InitializeGoogleAds();
 
         EffectManager.GetInstance();
 
@@ -249,4 +251,109 @@ public class GameManager : MonoBehaviour
             }
         });
     }
+
+
+    #region #### Google Ads ####
+
+    const string rewardAdUnit_test = "ca-app-pub-3940256099942544/5224354917";
+    const string rewardAdUnit_revive = "ca-app-pub-1021255306046408/1683457734";
+
+    bool isTestAd = true;
+
+    string adUnitRewardId = string.Empty;
+
+
+    private RewardedAd Rewarded_Revive_Ad;
+
+    public Action onUserEarnedReward_Revive;
+    public Action onAdLoaded_Revive;
+    public Action onAdClosed_Revive;
+
+    void InitializeGoogleAds()
+    {
+        if (isTestAd) adUnitRewardId = rewardAdUnit_test;
+        else adUnitRewardId = rewardAdUnit_revive;
+
+        MobileAds.Initialize(initStatus => {
+            Rewarded_Revive_Ad = CreateAndLoadRewardedAd(adUnitRewardId);
+        });
+    }
+
+    RewardedAd CreateAndLoadRewardedAd(string adUnitId)
+    {
+        RewardedAd rewardedAd = new RewardedAd(adUnitId);
+
+        rewardedAd.OnAdLoaded += HandleRewardedAdLoaded;
+        rewardedAd.OnUserEarnedReward += HandleUserEarnedReward;
+        rewardedAd.OnAdClosed += HandleRewardedAdClosed;
+
+        // Create an empty ad request.
+        AdRequest request = new AdRequest.Builder().Build();
+        // Load the rewarded ad with the request.
+        rewardedAd.LoadAd(request);
+        return rewardedAd;
+    }
+
+    public void ShowReviveAds()
+    {
+        if (this.Rewarded_Revive_Ad.IsLoaded())
+        {
+            this.Rewarded_Revive_Ad.Show();
+        }
+    }
+
+    void HandleRewardedAdLoaded(object sender, EventArgs args)
+    {
+        MonoBehaviour.print("HandleRewardedAdLoaded event received");
+
+        if (onAdLoaded_Revive != null) onAdLoaded_Revive();
+    }
+
+    public void HandleRewardedAdClosed(object sender, EventArgs args)
+    {
+        MonoBehaviour.print("HandleRewardedAdClosed event received");
+
+        Rewarded_Revive_Ad = CreateAndLoadRewardedAd(adUnitRewardId);
+
+        if (onAdClosed_Revive != null) onAdClosed_Revive();
+    }
+
+    public void HandleUserEarnedReward(object sender, Reward args)
+    {
+        string type = args.Type;
+        double amount = args.Amount;
+        MonoBehaviour.print(
+            "HandleRewardedAdRewarded event received for "
+                        + amount.ToString() + " " + type);
+
+        StartCoroutine(WaitUserEarnedRewardBecauseOfCrash());
+    }
+
+    public void HandleRewardedAdFailedToLoad(object sender, AdErrorEventArgs args)
+    {
+        MonoBehaviour.print(
+            "HandleRewardedAdFailedToLoad event received with message: "
+                             + args.Message);
+    }
+
+    public void HandleRewardedAdOpening(object sender, EventArgs args)
+    {
+        MonoBehaviour.print("HandleRewardedAdOpening event received");
+    }
+
+    public void HandleRewardedAdFailedToShow(object sender, AdErrorEventArgs args)
+    {
+        MonoBehaviour.print(
+            "HandleRewardedAdFailedToShow event received with message: "
+                             + args.Message);
+    }
+
+    IEnumerator WaitUserEarnedRewardBecauseOfCrash()
+    {
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        if (onUserEarnedReward_Revive != null) onUserEarnedReward_Revive();
+    }
+
+    #endregion
 }

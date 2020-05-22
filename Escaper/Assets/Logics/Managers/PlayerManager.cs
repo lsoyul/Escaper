@@ -42,6 +42,8 @@ public class PlayerManager : MonoBehaviour
 
         TopMostControl.Instance().onClickGameOverMenu += OnClickGameOverMenu;
         onChangePlayerStatus += TopMostControl.Instance().OnChangePlayerStatus;
+
+        GameManager.Instance().onUserEarnedReward_Revive += OnUserEarnedReward_Revive;
     }
 
     public static bool HasInstance()
@@ -259,27 +261,34 @@ public class PlayerManager : MonoBehaviour
                 }
                 break;
             case MENU_GAMEOVER.REVIVE_AD:
-                if (PlayerStatus.RemainReviveCount > 0)
-                {
-                    Vibration.Vibrate(100);
-                    PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
-                    PlayerStatus.RemainReviveCount -= 1;
 
-                    TopMostControl.Instance().StartGlobalLightEffect(Color.yellow, 2f, 0.2f);
-                    TopMostControl.Instance().GameOver(false);
-
-                    if (cameraController != null)
-                    {
-                        cameraController.CameraShake_Rot(5);
-                    }
-
-                    EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
-                    TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
-                    SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
-                }
+                GameManager.Instance().ShowReviveAds();
                 break;
             default:
                 break;
+        }
+    }
+
+    void OnUserEarnedReward_Revive()
+    {
+        // Success View Ads for Revive
+        if (PlayerStatus.RemainReviveCount > 0)
+        {
+            Vibration.Vibrate(100);
+            PlayerStatus.CurrentHP = PlayerStatus.MaxHP;
+            PlayerStatus.RemainReviveCount -= 1;
+
+            TopMostControl.Instance().StartGlobalLightEffect(Color.yellow, 2f, 0.2f);
+            TopMostControl.Instance().GameOver(false);
+
+            if (cameraController != null)
+            {
+                cameraController.CameraShake_Rot(5);
+            }
+
+            EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
+            TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
         }
     }
 
