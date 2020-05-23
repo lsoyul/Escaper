@@ -227,6 +227,9 @@ public static class GameStatics
     public const string sound_upgrade = "sound_upgrade";
     public const string sound_trapFire1 = "sound_trapFire1";
     public const string sound_powerUp = "sound_powerUp";
+    public const string sound_victory = "sound_victory";
+    public const string sound_explosion1 = "sound_explosion1";
+
     #endregion
 
     #region #### Warp Trigger ####

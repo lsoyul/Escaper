@@ -409,11 +409,14 @@ public class PlayerManager : MonoBehaviour
 
     IEnumerator ShowEnding()
     {
+        SoundManager.StopAllLoopingSounds();
+        yield return new WaitForSeconds(1f);
         // 1. Play Victory Sound
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_victory], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_victory].clip);
 
         yield return new WaitForSeconds(3f);
-        // 2. Show Confetti Effect
 
+        // 2. Show Confetti Effect
         Vector3 blast1 = cameraController.GetTargetPos();
         blast1.y += 60f;
 
@@ -433,14 +436,19 @@ public class PlayerManager : MonoBehaviour
         directional_right.y += 150f;
         directional_right.x += 90f;
 
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
         EffectManager.GetInstance().playEffect(directional_left, EFFECT.CONFETTI_DIRECTIONAL, Vector2.zero, false);
         yield return new WaitForSeconds(0.5f);
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
         EffectManager.GetInstance().playEffect(directional_right, EFFECT.CONFETTI_DIRECTIONAL, Vector2.zero, true);
         yield return new WaitForSeconds(1f);
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
         EffectManager.GetInstance().playEffect(blast1, EFFECT.CONFETTI_BLAST, Vector2.zero);
         yield return new WaitForSeconds(0.3f);
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
         EffectManager.GetInstance().playEffect(blast2, EFFECT.CONFETTI_BLAST, Vector2.zero);
         yield return new WaitForSeconds(0.3f);
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
         EffectManager.GetInstance().playEffect(blast3, EFFECT.CONFETTI_BLAST, Vector2.zero);
 
         yield return new WaitForSeconds(3f);
