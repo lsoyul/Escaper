@@ -7,6 +7,8 @@ using UnityEngine.Experimental.Rendering.Universal;
 using DigitalRuby.SoundManagerNamespace;
 
 using static GameStatics;
+using UnityEngine.UI;
+using System;
 
 public class TopMostControl : MonoBehaviour
 {
@@ -360,6 +362,8 @@ public class TopMostControl : MonoBehaviour
     {
         if (isShow)
         {
+            GameConfigs.SetCurrentMemoryShards(PlayerManager.Instance().PlayerStatus.CurrentMemoryShards);
+
             upgradeUITweener.gameObject.SetActive(true);
 
             upgradeUITweener.startingVector = outXPos_upgradeUI;
@@ -434,7 +438,7 @@ public class TopMostControl : MonoBehaviour
             
             Vibration.Vibrate(3);
             StartGlobalLightEffect(Color.white, 1f, 0.2f);
-            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade].clip);
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_powerUp], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_powerUp].clip);
 
             if (onCameraShake != null) onCameraShake(2);
         }
@@ -520,7 +524,7 @@ public class TopMostControl : MonoBehaviour
                 currentSelectedPortalTrigger.SetPortal(true);
 
                 StartGlobalLightEffect(Color.magenta, 4f, 0.6f);
-                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_upgrade].clip);
+                SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_powerUp], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_powerUp].clip);
                 if (onCameraShake != null) onCameraShake(7);
             }
         }
@@ -551,7 +555,16 @@ public class TopMostControl : MonoBehaviour
         {
             ShowPortalPurchaseUI(false, null);
         }
-    }
+
+        if (GameManager.Instance().IsGameInitialize)
+        {
+            TimeSpan diff = DateTime.UtcNow - GameManager.Instance().Time_LatestStartGame;
+            playUnixTime = GameConfigs.GetPlayUnixTime() + (int)diff.TotalSeconds;
+
+            TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(playUnixTime);
+
+            playTimeText.text = string.Format("{0}:{1}:{2}", curPlayTimeSpan.Hours, curPlayTimeSpan.Minutes.ToString("D2"), curPlayTimeSpan.Seconds.ToString("D2"));
+    } }
 
     public void StartGlobalLightEffect(Color lightColor, float lightIntensity, float oneWaySpeed)
     {
@@ -628,6 +641,27 @@ public class TopMostControl : MonoBehaviour
 
     public bool IsSettingState = false;
 
+    public Slider slider_bgm;
+    public Slider slider_sfx;
+
+    public Toggle toggle_vibrate;
+
+    public int playUnixTime;
+    public Text playTimeText;
+
+    public void OnChangeVibrateToggle()
+    {
+        GameConfigs.SetIsVibrate(toggle_vibrate.isOn);
+    }
+
+    public void OnChangeSoundSlider()
+    {
+        if (slider_bgm != null && slider_sfx != null)
+        {
+            GameConfigs.SetVolume(slider_bgm.value, slider_sfx.value);
+        }
+    }
+
     public void OnClickSettingShow()
     {
         bool possibleSettingShow = false;
@@ -657,6 +691,17 @@ public class TopMostControl : MonoBehaviour
 
             SettingControlTweenTrans.Begin();
             SettingControlTweenTrans.defaultVector = SettingControlTweenTrans.startingVector;
+
+            if (slider_bgm != null && slider_sfx != null)
+            {
+                slider_bgm.SetValueWithoutNotify(SoundManager.MusicVolume);
+                slider_sfx.SetValueWithoutNotify(SoundManager.SoundVolume);
+            }
+
+            if (toggle_vibrate != null)
+            {
+                toggle_vibrate.SetIsOnWithoutNotify(GameConfigs.GetIsVibrate());
+            }
         }
     }
 

@@ -53,9 +53,14 @@ public class PlayerControllerScripts : MonoBehaviour
     public LightBlink damagedLight;
     public LightBlink reviveLight;
 
+    [Header("- Text Effect -")]
     public TMPro.TextMeshPro textDamagedObject;
     public TweenValue textDamagedAlpha;
     public TweenTransforms textDamagedTransform;
+
+    public TMPro.TextMeshPro textShardGetObject;
+    public TweenValue textShardGetAlpha;
+    public TweenTransforms textShardGetTransform;
 
     // Falling State
     public bool isFalling = false;
@@ -98,8 +103,6 @@ public class PlayerControllerScripts : MonoBehaviour
 
         EffectManager.GetInstance();
 
-        textDamagedObject.GetComponent<MeshRenderer>().sortingLayerName = "Player";
-        textDamagedObject.GetComponent<MeshRenderer>().sortingOrder = 1;
     }
 
     private void OnDestroy()
@@ -359,9 +362,13 @@ public class PlayerControllerScripts : MonoBehaviour
         }
 
         // DamageText Effect
-        Color t = textDamagedObject.color;
-        t.a = textDamagedAlpha.value;
-        textDamagedObject.color = t;
+        Color textDamaged = textDamagedObject.color;
+        textDamaged.a = textDamagedAlpha.value;
+        textDamagedObject.color = textDamaged;
+
+        Color textShardGet = textShardGetObject.color;
+        textShardGet.a = textShardGetAlpha.value;
+        textShardGetObject.color = textShardGet;
     }
 
     void ControlGroundCollide()
@@ -466,7 +473,25 @@ public class PlayerControllerScripts : MonoBehaviour
         }
     }
 
+    public void ShowShardGetText(int shardAmount)
+    {
+        textShardGetObject.gameObject.SetActive(true);
+        textShardGetObject.text = "+" + shardAmount.ToString();
+        textShardGetAlpha.Begin();
+        textShardGetTransform.Begin();
 
+        textShardGetAlpha.value = textShardGetAlpha.startValue;
+        textShardGetTransform.vector3Results = textShardGetTransform.startingVector;
+
+        textShardGetAlpha.TweenCompleted += HideShardGettext;
+    }
+
+    void HideShardGettext()
+    {
+        textShardGetObject.text = string.Empty;
+        textShardGetObject.gameObject.SetActive(false);
+        textShardGetAlpha.TweenCompleted -= HideShardGettext;
+    }
 
     public void ShowDamageText(int damageNumber)
     {

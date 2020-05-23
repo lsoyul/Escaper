@@ -306,12 +306,13 @@ public class PlayerManager : MonoBehaviour
         if (shard.GetShardType() == SHARD_TYPE.SHARD1
             || shard.GetShardType() == SHARD_TYPE.SHARD2)
         {
-            PlayerStatus.CurrentMemoryShards +=
-                (int)(StageLoader.Instance().GetRandomShard(shard.GetShardType()) * StageLoader.Instance().GetShardMultifly());
+            int resultShardAmount = (int)(StageLoader.Instance().GetRandomShard(shard.GetShardType()) * StageLoader.Instance().GetShardMultifly());
 
-            TopMostControl.Instance().StartGlobalLightEffect(shard.GetShardTargetColor(), 0.3f, 0.1f);
+            PlayerStatus.CurrentMemoryShards += resultShardAmount;
+            playerController.ShowShardGetText(resultShardAmount);
         }
 
+        TopMostControl.Instance().StartGlobalLightEffect(shard.GetShardTargetColor(), 0.5f, 0.1f);
         GetPlayerControl().BlinkPlayerShardLight(shard.GetShardTargetColor());
         SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_gainShard], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_gainShard].clip);
     }

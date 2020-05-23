@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DigitalRuby.SoundManagerNamespace;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ public class GameConfigs
     private static int portal_stage2_1 = 0;
     private static int portal_stage3_1 = 0;
 
+    private static int vibrate = 1;
+
+    private static int playunixtime = 0;
     #endregion
 
     #region ### GETTER ###
@@ -90,6 +94,14 @@ public class GameConfigs
 
         portal_stage1_1 = PlayerPrefs.GetInt(GameStatics.PREFS_PORTAL_Stage1_1, 0);
         portal_stage2_1 = PlayerPrefs.GetInt(GameStatics.PREFS_PORTAL_Stage2_1, 0);
+        portal_stage3_1 = PlayerPrefs.GetInt(GameStatics.PREFS_PORTAL_Stage3_1, 0);
+
+        SoundManager.MusicVolume = PlayerPrefs.GetFloat(GameStatics.PREFS_VOLUME_BGM, 0.5f);
+        SoundManager.SoundVolume = PlayerPrefs.GetFloat(GameStatics.PREFS_VOLUME_SFX, 0.5f);
+
+        vibrate = PlayerPrefs.GetInt(GameStatics.PREFS_VIBRATE, 1);
+
+        playunixtime = PlayerPrefs.GetInt(GameStatics.PREFS_PLAYTIME, 0);
     }
 
     public static void InitializeConfigs()
@@ -99,6 +111,8 @@ public class GameConfigs
         skillLevel_AirTimeDuration = 0;
         skillLevel_IncreaseShardsPullDistance = 0;
         currentMemoryShards = 0;
+        vibrate = 1;
+        playunixtime = 0;
 
         PlayerPrefs.SetInt(GameStatics.PREFS_MaxProgressStage, maxProgressStage);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_MaxHP, skillLevel_MaxHP);
@@ -107,6 +121,18 @@ public class GameConfigs
         PlayerPrefs.SetInt(GameStatics.PREFS_CurrentMemoryShards, currentMemoryShards);
 
         PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage1_1, 0);
+        PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage2_1, 0);
+        PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage3_1, 0);
+
+        PlayerPrefs.SetFloat(GameStatics.PREFS_VOLUME_BGM, 0.5f);
+        PlayerPrefs.SetFloat(GameStatics.PREFS_VOLUME_SFX, 0.5f);
+
+        SoundManager.MusicVolume = 0.5f;
+        SoundManager.SoundVolume = 0.5f;
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_VIBRATE, 1);
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_PLAYTIME, 0);
     }
 
     public static void SetMaxProgressStage(int maxStage)
@@ -167,5 +193,38 @@ public class GameConfigs
             default:
                 break;
         }
+    }
+
+    public static void SetVolume(float bgmVolume, float sfxVolume)
+    {
+        PlayerPrefs.SetFloat(GameStatics.PREFS_VOLUME_BGM, bgmVolume);
+        PlayerPrefs.SetFloat(GameStatics.PREFS_VOLUME_SFX, sfxVolume);
+
+        SoundManager.MusicVolume = bgmVolume;
+        SoundManager.SoundVolume = sfxVolume;
+    }
+
+    public static bool GetIsVibrate()
+    {
+        return (vibrate == 1) ? true : false;
+    }
+
+    public static void SetIsVibrate(bool isVibrate)
+    {
+        vibrate = (isVibrate) ? 1 : 0;
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_VIBRATE, vibrate);
+    }
+
+    public static int GetPlayUnixTime()
+    {
+        return playunixtime;
+    }
+
+    public static void SetPlayTime(int playtime)
+    {
+        playunixtime = playtime;
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_PLAYTIME, playunixtime);
     }
 }

@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     #endregion
 
 
-    bool isGameInitialize = false;
+    public bool IsGameInitialize = false;
 
     private void Awake() {
         
@@ -70,18 +70,20 @@ public class GameManager : MonoBehaviour
 
         // 1. Load GameConfigs
         // 2. Set PlayerStatus
-        if (isGameInitialize == false)
+        if (IsGameInitialize == false)
         {
             GameConfigs.LoadConfigs();
             PlayerManager.Instance().InitializePlayer();
 
-            isGameInitialize = true;
+            IsGameInitialize = true;
         }
 
         InitializeFireBase();
         InitializeGoogleAds();
 
         EffectManager.GetInstance();
+
+        Time_LatestStartGame = DateTime.UtcNow;
 
         //Screen.SetResolution(720, 1280, true, 60);
     }
@@ -251,7 +253,11 @@ public class GameManager : MonoBehaviour
             }
         });
     }
+    #region #### Play Time ####
 
+    public DateTime Time_LatestStartGame = new DateTime();
+
+    #endregion
 
     #region #### Google Ads ####
 
@@ -356,4 +362,21 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
+
+    private void OnApplicationPause(bool pause)
+    {
+        if (pause)
+        {
+            GameConfigs.SetPlayTime(TopMostControl.Instance().playUnixTime);
+        }
+        else
+        {
+            Time_LatestStartGame = DateTime.UtcNow;
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        GameConfigs.SetPlayTime(TopMostControl.Instance().playUnixTime);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -223,6 +224,7 @@ public static class GameStatics
     public const string sound_timestop   = "sound_timestop";
     public const string sound_upgrade = "sound_upgrade";
     public const string sound_trapFire1 = "sound_trapFire1";
+    public const string sound_powerUp = "sound_powerUp";
     #endregion
 
     #region #### Warp Trigger ####
@@ -326,5 +328,11 @@ public static class GameStatics
     public const string PREFS_PORTAL_Stage2_1 = "PREFS_PORTAL_Stage2_1";
     public const string PREFS_PORTAL_Stage3_1 = "PREFS_PORTAL_Stage3_1";
 
+    public const string PREFS_VOLUME_BGM = "PREFS_VOLUME_BGM";
+    public const string PREFS_VOLUME_SFX = "PREFS_VOLUME_SFX";
+
+    public const string PREFS_VIBRATE = "PREFS_VIBRATE";
+
+    public const string PREFS_PLAYTIME = "PREFS_PLAYTIME";
     #endregion
 }

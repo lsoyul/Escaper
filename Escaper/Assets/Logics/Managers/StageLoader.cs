@@ -51,8 +51,22 @@ public class StageLoader : MonoBehaviour
         }
 
         CurrentStage = tarStage;
-        PlayerManager.Instance().InitializePlayer();
-        PlayerManager.Instance().SetPlayerController(true);
+
+        if (CurrentStage == 1) PlayerManager.Instance().InitializePlayer();
+
+        switch (CurrentStage)
+        {
+            case 1:
+                PlayerManager.Instance().SetPlayerController(true, true);
+                break;
+            case 2:
+            case 3:
+                PlayerManager.Instance().SetPlayerController(true, false);
+                break;
+            default:
+                PlayerManager.Instance().SetPlayerController(true);
+                break;
+        }
 
         int stage = tarStage - 1;
         
