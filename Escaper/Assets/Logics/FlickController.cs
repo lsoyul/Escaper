@@ -76,6 +76,7 @@ public class FlickController : MonoBehaviour
     bool CheckControllableStatus()
     {
         if (PlayerManager.Instance().IsDead) return false;
+        if (PlayerManager.Instance().IsTriggerEnding) return false;
         if (TopMostControl.Instance().GetIsSceneChanging() == true) return false;
 
         return true;

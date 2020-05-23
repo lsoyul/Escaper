@@ -54,6 +54,8 @@ public static class GameStatics
         GET_SHARD,
         YELLOW_PILLAR,
         Explosion1,
+        CONFETTI_BLAST,
+        CONFETTI_DIRECTIONAL
     }
 
     public enum DAMAGED_TYPE

@@ -80,6 +80,20 @@ public class EffectManager : MonoBehaviour
                 go_eff = Instantiate(Resources.Load("Effects/Eff_Explosion1"), targetPos, Quaternion.Euler(0, 0, 0)) as GameObject;
 
                 break;
+            case GameStatics.EFFECT.CONFETTI_BLAST:
+                go_eff = Instantiate(Resources.Load("Effects/Eff_ConfettiBlast"), targetPos, Quaternion.Euler(0, 0, 0)) as GameObject;
+                break;
+            case GameStatics.EFFECT.CONFETTI_DIRECTIONAL:
+
+                if (xReverse == false)
+                {
+                    go_eff = Instantiate(Resources.Load("Effects/Eff_ConfettiDirectional"), targetPos, Quaternion.Euler(45, 90, 0)) as GameObject;
+                }
+                else
+                {
+                    go_eff = Instantiate(Resources.Load("Effects/Eff_ConfettiDirectional"), targetPos, Quaternion.Euler(135, 90, 0)) as GameObject;
+                }
+                break;
         }
 
     }

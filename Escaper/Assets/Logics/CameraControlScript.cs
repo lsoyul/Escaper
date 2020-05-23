@@ -103,10 +103,23 @@ public class CameraControlScript : MonoBehaviour {
         if (StageLoader.CurrentStage == 3)
         {
             if (player.transform.position.y > 1715 &&
-                player.transform.position.x > -3)
+                (player.transform.position.x > -3 && player.transform.position.x < 120))
             {
+                // Last Jump
                 targetPos.x = 82;
                 targetPos.y = 1718;
+            }
+            else if (player.transform.position.y > 1700
+                && player.transform.position.x >= 120)
+            {
+                // Ending Trigger
+                targetPos.x = 145;
+                targetPos.y = 1720;
+                
+                if (!PlayerManager.Instance().IsTriggerEnding && player.IsGround())
+                {
+                    PlayerManager.Instance().IsTriggerEnding = true;
+                }
             }
         }
 

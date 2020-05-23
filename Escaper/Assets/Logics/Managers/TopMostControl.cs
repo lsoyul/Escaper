@@ -556,6 +556,11 @@ public class TopMostControl : MonoBehaviour
             ShowPortalPurchaseUI(false, null);
         }
 
+        ShowOptionPlayTimer();
+    }
+
+    void ShowOptionPlayTimer()
+    {
         if (GameManager.Instance().IsGameInitialize)
         {
             TimeSpan diff = DateTime.UtcNow - GameManager.Instance().Time_LatestStartGame;
@@ -564,7 +569,8 @@ public class TopMostControl : MonoBehaviour
             TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(playUnixTime);
 
             playTimeText.text = string.Format("{0}:{1}:{2}", curPlayTimeSpan.Hours, curPlayTimeSpan.Minutes.ToString("D2"), curPlayTimeSpan.Seconds.ToString("D2"));
-    } }
+        }
+    }
 
     public void StartGlobalLightEffect(Color lightColor, float lightIntensity, float oneWaySpeed)
     {

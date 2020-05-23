@@ -8,6 +8,8 @@ using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
 using GooglePlayGames.BasicApi.Multiplayer;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
+using System.Diagnostics;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -382,6 +384,69 @@ public class PlayerManager : MonoBehaviour
     {
         currentPlayerSprite = playerSkin;
         if (onChangePlayerSkin != null) onChangePlayerSkin();
+    }
+
+    #region #### Ending Trigger ####
+
+    private bool isTriggerEnding;
+    public Action onTriggerEnding;
+
+    public bool IsTriggerEnding
+    {
+        get { return isTriggerEnding; }
+        set { 
+            isTriggerEnding = value; 
+            if (isTriggerEnding == true)
+            {
+                StartCoroutine(ShowEnding());
+                if (onTriggerEnding != null) onTriggerEnding();
+            }
+        }
+    }
+
+
+    #endregion
+
+    IEnumerator ShowEnding()
+    {
+        // 1. Play Victory Sound
+
+        yield return new WaitForSeconds(3f);
+        // 2. Show Confetti Effect
+
+        Vector3 blast1 = cameraController.GetTargetPos();
+        blast1.y += 60f;
+
+        Vector3 blast2 = cameraController.GetTargetPos();
+        blast2.y += 50f;
+        blast2.x -= 20f;
+
+        Vector3 blast3 = cameraController.GetTargetPos();
+        blast3.y += 70f;
+        blast3.x += 20f;
+
+        Vector3 directional_left = cameraController.GetTargetPos();
+        directional_left.y += 150f;
+        directional_left.x -= 90f;
+
+        Vector3 directional_right = cameraController.GetTargetPos();
+        directional_right.y += 150f;
+        directional_right.x += 90f;
+
+        EffectManager.GetInstance().playEffect(directional_left, EFFECT.CONFETTI_DIRECTIONAL, Vector2.zero, false);
+        yield return new WaitForSeconds(0.5f);
+        EffectManager.GetInstance().playEffect(directional_right, EFFECT.CONFETTI_DIRECTIONAL, Vector2.zero, true);
+        yield return new WaitForSeconds(1f);
+        EffectManager.GetInstance().playEffect(blast1, EFFECT.CONFETTI_BLAST, Vector2.zero);
+        yield return new WaitForSeconds(0.3f);
+        EffectManager.GetInstance().playEffect(blast2, EFFECT.CONFETTI_BLAST, Vector2.zero);
+        yield return new WaitForSeconds(0.3f);
+        EffectManager.GetInstance().playEffect(blast3, EFFECT.CONFETTI_BLAST, Vector2.zero);
+
+        yield return new WaitForSeconds(3f);
+
+        // 3. Show Records
+
     }
 
     //=== TESTCODE ===
