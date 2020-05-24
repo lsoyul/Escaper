@@ -17,7 +17,7 @@ public class GameUI : MonoBehaviour
     public TweenColor shardTweenColor;
     public TweenVector shardSpriteTweenScale;
     public TweenVector shardTextTweenScale;
-    
+
     Color targetHPColor;
     public Color targetShardColor;
 
@@ -27,11 +27,13 @@ public class GameUI : MonoBehaviour
     private void OnEnable()
     {
         PlayerManager.Instance().onChangePlayerStatus += OnChangePlayerStatus;
+        PlayerManager.Instance().onTriggerEnding += OnTriggerEnding;
     }
 
     private void OnDisable()
     {
         PlayerManager.Instance().onChangePlayerStatus -= OnChangePlayerStatus;
+        PlayerManager.Instance().onTriggerEnding -= OnTriggerEnding;
     }
 
     private void Start()
@@ -56,7 +58,6 @@ public class GameUI : MonoBehaviour
             PlayShardTween(true);
         }
     }
-
 
 
     void PlayHPTween(bool activeTween)
@@ -116,6 +117,15 @@ public class GameUI : MonoBehaviour
             shardTextTweenScale.vector3Results = shardTextTweenScale.endVector;
         }
     }
+
+    void OnTriggerEnding()
+    { 
+        HPSprite.SetActive(false);
+        currentHP.gameObject.SetActive(false);
+
+        ShardSprite.SetActive(false);
+        currentShard.gameObject.SetActive(false);
+    } 
 
     private void Update()
     {

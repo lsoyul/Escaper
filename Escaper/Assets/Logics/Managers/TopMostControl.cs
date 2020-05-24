@@ -129,6 +129,8 @@ public class TopMostControl : MonoBehaviour
             testscript.gameObject.SetActive(false);
         }
 
+        PlayerManager.Instance().IsTriggerEnding = false;
+
         StartBGM(scene);
         ChangeEnvironment(scene);
     }

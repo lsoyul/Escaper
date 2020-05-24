@@ -115,6 +115,13 @@ public static class GameStatics
         STAGE3_1,
     }
 
+    public enum PLAY_MODE
+    {
+        NORMAL,
+        TRUE
+    }
+
+
     #region #### Logics ####
 
     public static float Angle(Vector2 p_vector2)
@@ -339,5 +346,8 @@ public static class GameStatics
     public const string PREFS_VIBRATE = "PREFS_VIBRATE";
 
     public const string PREFS_PLAYTIME = "PREFS_PLAYTIME";
+
+    public const string PREFS_ENDING_NORMAL = "PREFS_ENDING_NORMAL";
+    public const string PREFS_ENDING_TRUE = "PREFS_ENDING_TRUE";
     #endregion
 }

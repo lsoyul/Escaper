@@ -615,6 +615,7 @@ public class PlayerControllerScripts : MonoBehaviour
         // Death for Upgrade
         if (isGround && !PlayerManager.Instance().IsDead && !startDeathForUpgradeAct)
         {
+            SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_fallGround].clip);
             startDeathForUpgradeAct = true;
             PlayerManager.Instance().PlayerStatus.CurrentHP = 0;
             damagedLight.StartBlink(2f, Color.red);

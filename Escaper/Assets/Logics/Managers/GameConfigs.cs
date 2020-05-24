@@ -24,6 +24,9 @@ public class GameConfigs
     private static int vibrate = 1;
 
     private static int playunixtime = 0;
+
+    private static int ending_normal = 0;
+    private static int ending_true = 0;
     #endregion
 
     #region ### GETTER ###
@@ -102,6 +105,9 @@ public class GameConfigs
         vibrate = PlayerPrefs.GetInt(GameStatics.PREFS_VIBRATE, 1);
 
         playunixtime = PlayerPrefs.GetInt(GameStatics.PREFS_PLAYTIME, 0);
+
+        ending_normal = PlayerPrefs.GetInt(GameStatics.PREFS_ENDING_NORMAL, 0);
+        ending_true = PlayerPrefs.GetInt(GameStatics.PREFS_ENDING_TRUE, 0);
     }
 
     public static void InitializeConfigs()
@@ -113,6 +119,8 @@ public class GameConfigs
         currentMemoryShards = 0;
         vibrate = 1;
         playunixtime = 0;
+        ending_normal = 0;
+        ending_true = 0;
 
         PlayerPrefs.SetInt(GameStatics.PREFS_MaxProgressStage, maxProgressStage);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_MaxHP, skillLevel_MaxHP);
@@ -133,6 +141,9 @@ public class GameConfigs
         PlayerPrefs.SetInt(GameStatics.PREFS_VIBRATE, 1);
 
         PlayerPrefs.SetInt(GameStatics.PREFS_PLAYTIME, 0);
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_NORMAL, 0);
+        PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_TRUE, 0);
     }
 
     public static void SetMaxProgressStage(int maxStage)
@@ -226,5 +237,26 @@ public class GameConfigs
         playunixtime = playtime;
 
         PlayerPrefs.SetInt(GameStatics.PREFS_PLAYTIME, playunixtime);
+    }
+
+    public static void SetNormalEnding()
+    {
+        ending_normal = 1;
+        PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_NORMAL, ending_normal);
+    }
+    public static void SetTrueEnding()
+    {
+        ending_true = 1;
+        PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_TRUE, ending_true);
+    }
+
+    public static bool GetNormalEnding()
+    {
+        return (ending_normal == 1) ? true : false;
+    }
+
+    public static bool GetTrueEnding()
+    {
+        return (ending_true == 1) ? true : false;
     }
 }

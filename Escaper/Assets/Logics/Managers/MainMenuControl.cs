@@ -242,4 +242,16 @@ public class MainMenuControl : MonoBehaviour
         }
     }
 
+    public void OnClickChangePlayMode()
+    {
+        if (PlayerManager.Instance().PlayMode == PLAY_MODE.NORMAL)
+        {
+            PlayerManager.Instance().PlayMode = PLAY_MODE.TRUE;
+        }
+        else
+        {
+            PlayerManager.Instance().PlayMode = PLAY_MODE.NORMAL;
+        }
+    }
+
 }

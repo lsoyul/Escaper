@@ -388,6 +388,15 @@ public class PlayerManager : MonoBehaviour
 
     #region #### Ending Trigger ####
 
+    private GameStatics.PLAY_MODE playMode;
+
+    public GameStatics.PLAY_MODE PlayMode
+    {
+        get { return playMode; }
+        set { playMode = value; }
+    }
+
+
     private bool isTriggerEnding;
     public Action onTriggerEnding;
 
@@ -398,6 +407,15 @@ public class PlayerManager : MonoBehaviour
             isTriggerEnding = value; 
             if (isTriggerEnding == true)
             {
+                if (PlayMode == PLAY_MODE.NORMAL)
+                {
+                    GameConfigs.SetNormalEnding();
+                }
+                else if (PlayMode == PLAY_MODE.TRUE)
+                {
+                    GameConfigs.SetTrueEnding();
+                }
+
                 StartCoroutine(ShowEnding());
                 if (onTriggerEnding != null) onTriggerEnding();
             }
@@ -409,7 +427,15 @@ public class PlayerManager : MonoBehaviour
 
     IEnumerator ShowEnding()
     {
+        TopMostControl.Instance().SettingShowButton.SetActive(false);
+        TopMostControl.Instance().ReturnButton.SetActive(false);
+
         SoundManager.StopAllLoopingSounds();
+
+        TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(TopMostControl.Instance().playUnixTime);
+        string playTimeText
+            = string.Format("{0}:{1}:{2}", curPlayTimeSpan.Hours, curPlayTimeSpan.Minutes.ToString("D2"), curPlayTimeSpan.Seconds.ToString("D2"));
+
         yield return new WaitForSeconds(1f);
         // 1. Play Victory Sound
         SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_victory], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_victory].clip);
@@ -454,11 +480,6 @@ public class PlayerManager : MonoBehaviour
         yield return new WaitForSeconds(3f);
 
         // 3. Show Records
-        TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(TopMostControl.Instance().playUnixTime);
-
-        string playTimeText 
-            = string.Format("{0}:{1}:{2}", curPlayTimeSpan.Hours, curPlayTimeSpan.Minutes.ToString("D2"), curPlayTimeSpan.Seconds.ToString("D2"));
-
         TopMostControl.Instance().PopupSingle.ShowPopup(
             "<color=yellow>Contraturation !</color>",
             "<color=white>PlayTime:</color> " + "<color=red>" + playTimeText + "</color>");
