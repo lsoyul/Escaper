@@ -753,6 +753,12 @@ public class TopMostControl : MonoBehaviour
 
     #endregion
 
+    #region #### Popup Control ####
+    [Header("- Popup Control -")]
+    public PopupSingle PopupSingle;
+
+    #endregion
+
     [Header("- TEST -")]
     public TestScript testscript;
 }

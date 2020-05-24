@@ -454,7 +454,17 @@ public class PlayerManager : MonoBehaviour
         yield return new WaitForSeconds(3f);
 
         // 3. Show Records
+        TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(TopMostControl.Instance().playUnixTime);
 
+        string playTimeText 
+            = string.Format("{0}:{1}:{2}", curPlayTimeSpan.Hours, curPlayTimeSpan.Minutes.ToString("D2"), curPlayTimeSpan.Seconds.ToString("D2"));
+
+        TopMostControl.Instance().PopupSingle.ShowPopup(
+            "<color=yellow>Contraturation !</color>",
+            "<color=white>PlayTime:</color> " + "<color=red>" + playTimeText + "</color>");
+
+        TopMostControl.Instance().PopupSingle.ShowPopup("Title", "test1");
+        TopMostControl.Instance().PopupSingle.ShowPopup("Title", "test2");
     }
 
     //=== TESTCODE ===
