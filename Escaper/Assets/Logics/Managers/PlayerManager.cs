@@ -484,8 +484,12 @@ public class PlayerManager : MonoBehaviour
             "<color=yellow>Contraturation !</color>",
             "<color=white>PlayTime:</color> " + "<color=red>" + playTimeText + "</color>");
 
-        TopMostControl.Instance().PopupSingle.ShowPopup("Title", "test1");
-        TopMostControl.Instance().PopupSingle.ShowPopup("Title", "test2");
+        TopMostControl.Instance().PopupSingle.ShowPopup(
+            "<color=yellow>CLEAR Normal Mode</color>",
+            "<color=red>True Hero Mode</color>\n <color=white>is Unlocked!</color>",
+            () => {
+                TopMostControl.Instance().StartChangeScene(SCENE_INDEX.MAINMENU, true);
+            });
     }
 
     //=== TESTCODE ===

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using DigitalRuby.SoundManagerNamespace;
+using System;
 
 public class PopupSingle : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class PopupSingle : MonoBehaviour
     {
         public string title;
         public string desc;
+        public Action closeCallback;
     }
 
     private Queue<popupBase> popupList = new Queue<popupBase>();
@@ -26,13 +28,14 @@ public class PopupSingle : MonoBehaviour
         DestroyAllPopup();
     }
 
-    public void ShowPopup(string title, string desc)
+    public void ShowPopup(string title, string desc, Action closeCallback = null)
     {
         if (popupList == null) popupList = new Queue<popupBase>();
 
         popupBase newPopup = new popupBase();
         newPopup.title = title;
         newPopup.desc = desc;
+        newPopup.closeCallback = closeCallback;
 
         popupList.Enqueue(newPopup);
 
@@ -52,7 +55,9 @@ public class PopupSingle : MonoBehaviour
 
     public void OnClickClose()
     {
-        popupList.Dequeue();
+        popupBase closePopup = popupList.Dequeue();
+        closePopup.closeCallback?.Invoke();
+
         if (popupList.Count > 0)
         {
             // if popup exist
