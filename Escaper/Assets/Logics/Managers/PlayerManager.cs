@@ -6,10 +6,6 @@ using UnityEngine.SceneManagement;
 using System;
 using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
-using GooglePlayGames.BasicApi.Multiplayer;
-using TMPro;
-using UnityEditor.Experimental.GraphView;
-using System.Diagnostics;
 
 public class PlayerManager : MonoBehaviour
 {

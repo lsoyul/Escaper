@@ -692,7 +692,7 @@ public class PlayerControllerScripts : MonoBehaviour
             {
                 if (isFalling)
                 {
-                    damagedLight.StartBlink(1.0f, Color.red); 
+                    damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red); 
                     StartCoroutine(TriggerHurt(null, this.unbeatableDuration_hurt, false));
                     PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
                     isFainting = true;
@@ -701,7 +701,6 @@ public class PlayerControllerScripts : MonoBehaviour
 
                 PlayerManager.Instance().OnGround();
             }
-
         }
 
         if (isFalling)
