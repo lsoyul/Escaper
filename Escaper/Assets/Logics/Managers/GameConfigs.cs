@@ -27,6 +27,8 @@ public class GameConfigs
 
     private static int ending_normal = 0;
     private static int ending_true = 0;
+
+    private static int last_playmode = 0;
     #endregion
 
     #region ### GETTER ###
@@ -108,6 +110,8 @@ public class GameConfigs
 
         ending_normal = PlayerPrefs.GetInt(GameStatics.PREFS_ENDING_NORMAL, 0);
         ending_true = PlayerPrefs.GetInt(GameStatics.PREFS_ENDING_TRUE, 0);
+
+        last_playmode = PlayerPrefs.GetInt(GameStatics.PREFS_LAST_PLAYMODE, 0);
     }
 
     public static void InitializeConfigs()
@@ -121,6 +125,7 @@ public class GameConfigs
         playunixtime = 0;
         ending_normal = 0;
         ending_true = 0;
+        last_playmode = 0;
 
         PlayerPrefs.SetInt(GameStatics.PREFS_MaxProgressStage, maxProgressStage);
         PlayerPrefs.SetInt(GameStatics.PREFS_SkillLevel_MaxHP, skillLevel_MaxHP);
@@ -144,6 +149,8 @@ public class GameConfigs
 
         PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_NORMAL, 0);
         PlayerPrefs.SetInt(GameStatics.PREFS_ENDING_TRUE, 0);
+
+        PlayerPrefs.SetInt(GameStatics.PREFS_LAST_PLAYMODE, 0);
     }
 
     public static void SetMaxProgressStage(int maxStage)
@@ -258,5 +265,35 @@ public class GameConfigs
     public static bool GetTrueEnding()
     {
         return (ending_true == 1) ? true : false;
+    }
+
+    public static void SetLastPlayMode(GameStatics.PLAY_MODE playMode)
+    {
+        switch (playMode)
+        {
+            case GameStatics.PLAY_MODE.NORMAL:
+                PlayerPrefs.SetInt(GameStatics.PREFS_LAST_PLAYMODE, 0);
+                break;
+            case GameStatics.PLAY_MODE.TRUE:
+                PlayerPrefs.SetInt(GameStatics.PREFS_LAST_PLAYMODE, 1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static GameStatics.PLAY_MODE GetLastPlayMode()
+    {
+        int playModeInt = PlayerPrefs.GetInt(GameStatics.PREFS_LAST_PLAYMODE, 0);
+
+        switch (playModeInt)
+        {
+            case 0:
+                return GameStatics.PLAY_MODE.NORMAL;
+            case 1:
+                return GameStatics.PLAY_MODE.TRUE;
+            default:
+                return GameStatics.PLAY_MODE.NORMAL;
+        }
     }
 }

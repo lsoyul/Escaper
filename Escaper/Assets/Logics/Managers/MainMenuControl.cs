@@ -7,6 +7,7 @@ using UnityEngine.Experimental.Rendering.Universal;
 using DigitalRuby.SoundManagerNamespace;
 
 using static GameStatics;
+using UnityEngine.UI;
 
 public class MainMenuControl : MonoBehaviour
 {
@@ -29,15 +30,24 @@ public class MainMenuControl : MonoBehaviour
     public TweenTransforms mainTitle_transformTween;
     private bool mainTitle_animatingStart = false;
 
+    public TweenValue global2DLight_Ending1_intensityTween;
+    public Light2D global2DLight_Ending1;
+
     [Header("- Buttons -")]
     //public GameObject Btn_GoogleLogin;
     //public GameObject Btn_AnonymousPlay;
     //public GameObject Btn_Logout;
 
     public TweenTransforms Btn_Newgame;
-    public TweenTransforms Btn_Continue;
+    public TweenTransforms Btn_ChangeMode;
 
     bool isEndAnimating = false;
+
+    [Header("- After Ending Control -")]
+    public GameObject Show_NormalObject;
+    public GameObject Show_Ending1Object;
+
+    public Text ChangeModeText;
 
     [Header("- DebugTest -")]
     public UnityEngine.UI.Text debugText;
@@ -49,14 +59,10 @@ public class MainMenuControl : MonoBehaviour
 
     private void OnEnable()
     {
-        //GameManager.Instance().onLoginFinish += OnGoogleLoginFinish;
-        //GameManager.Instance().onSignout += OnSignOut;
     }
 
     private void OnDisable()
     {
-        //GameManager.Instance().onLoginFinish -= OnGoogleLoginFinish;
-        //GameManager.Instance().onSignout -= OnSignOut;
     }
     void Start()
     {
@@ -77,8 +83,42 @@ public class MainMenuControl : MonoBehaviour
         }
         // -- Camera Init --
 
+        if (PlayerManager.Instance().PlayMode == PLAY_MODE.TRUE)
+        {
+            Show_NormalObject.SetActive(false);
+            Show_Ending1Object.SetActive(true);
+
+            mainTitle_animatingStart = true;
+
+            mainTitle_transformTween.Begin();
+            mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
+
+            Btn_Newgame.Begin();
+            Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
+
+            if (GameConfigs.GetNormalEnding() == true)
+            {
+                Btn_ChangeMode.Begin();
+                Btn_ChangeMode.transform.localPosition = Btn_ChangeMode.startingVector;
+            }
+
+            global2DLight.intensity = globalLight2D_intensityBlink.endValue;
+        }
+        else
+        {
+            Show_NormalObject.SetActive(true);
+            Show_Ending1Object.SetActive(false);
+        }
+
+
+        if (GameConfigs.GetNormalEnding() == true)
+        {
+            SetChangeModeText(PlayerManager.Instance().PlayMode);
+        }
+
+
         Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
-        Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+        Btn_ChangeMode.transform.localPosition = Btn_ChangeMode.startingVector;
         mainTitle.transform.localPosition = mainTitle_transformTween.startingVector;
 
         //TopMostControl.Instance().GetController().onPointerDown += OnPointerDown;
@@ -108,7 +148,8 @@ public class MainMenuControl : MonoBehaviour
         };
 
         light1_intensityTweenFadeout.TweenCompleted += () => {
-            if (!isEndAnimating && !mainTitle_animatingStart) {
+            if (!isEndAnimating && !mainTitle_animatingStart)
+            {
                 mainTitle_animatingStart = true;
 
                 mainTitle_transformTween.Begin();
@@ -117,8 +158,11 @@ public class MainMenuControl : MonoBehaviour
                 Btn_Newgame.Begin();
                 Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
 
-                Btn_Continue.Begin();
-                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+                if (GameConfigs.GetNormalEnding() == true)
+                {
+                    Btn_ChangeMode.Begin();
+                    Btn_ChangeMode.transform.localPosition = Btn_ChangeMode.startingVector;
+                }
             }
         };
 
@@ -133,7 +177,7 @@ public class MainMenuControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-#region Animating
+        #region Animating
 
         if (light1_intensityFadeoutStart == false)
         {
@@ -145,7 +189,7 @@ public class MainMenuControl : MonoBehaviour
             light1.intensity = light1_intensityTweenFadeout.value;
         }
 
-        if (light1_angleTweenStart) 
+        if (light1_angleTweenStart)
         {
             light1.pointLightInnerAngle = 1f;
             light1.pointLightOuterAngle = light1_outherAngleTween.value;
@@ -162,12 +206,17 @@ public class MainMenuControl : MonoBehaviour
             mainTitle.transform.localPosition = mainTitle_transformTween.transform.position;
         }
 
+        if (GameConfigs.GetNormalEnding() == true)
+        {
+            global2DLight_Ending1.intensity = global2DLight_Ending1_intensityTween.value;
+        }
+
         #endregion
 
         #region # Input Control #
 
 #if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0))
         {
             if (touchOn == false)
             {
@@ -221,8 +270,11 @@ public class MainMenuControl : MonoBehaviour
                 Btn_Newgame.Begin();
                 Btn_Newgame.transform.localPosition = Btn_Newgame.startingVector;
 
-                Btn_Continue.Begin();
-                Btn_Continue.transform.localPosition = Btn_Continue.startingVector;
+                if (GameConfigs.GetNormalEnding() == true)
+                {
+                    Btn_ChangeMode.Begin();
+                    Btn_ChangeMode.transform.localPosition = Btn_ChangeMode.startingVector;
+                }
 
                 mainTitle_animatingStart = true;
             }
@@ -247,10 +299,37 @@ public class MainMenuControl : MonoBehaviour
         if (PlayerManager.Instance().PlayMode == PLAY_MODE.NORMAL)
         {
             PlayerManager.Instance().PlayMode = PLAY_MODE.TRUE;
+            GameConfigs.SetLastPlayMode(PLAY_MODE.TRUE);
+            Show_NormalObject.SetActive(false);
+            Show_Ending1Object.SetActive(true);
         }
         else
         {
             PlayerManager.Instance().PlayMode = PLAY_MODE.NORMAL;
+            GameConfigs.SetLastPlayMode(PLAY_MODE.NORMAL);
+            Show_NormalObject.SetActive(true);
+            Show_Ending1Object.SetActive(false);
+        }
+
+        SetChangeModeText(PlayerManager.Instance().PlayMode);
+    }
+
+    void SetChangeModeText(PLAY_MODE playMode)
+    {
+        switch (playMode)
+        {
+            case PLAY_MODE.NORMAL:
+                ChangeModeText.text = "NORMAL";
+                ChangeModeText.color = Color.green;
+                break;
+            case PLAY_MODE.TRUE:
+                ChangeModeText.text = "TRUE HERO";
+                ChangeModeText.color = Color.cyan;
+                break;
+            default:
+                ChangeModeText.text = "NORMAL";
+                ChangeModeText.color = Color.green;
+                break;
         }
     }
 

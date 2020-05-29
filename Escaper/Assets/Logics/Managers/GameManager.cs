@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
         {
             GameConfigs.LoadConfigs();
             PlayerManager.Instance().InitializePlayer();
+            PlayerManager.Instance().PlayMode = GameConfigs.GetLastPlayMode();
 
             IsGameInitialize = true;
         }
