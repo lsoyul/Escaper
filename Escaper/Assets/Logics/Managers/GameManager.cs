@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
 
 
     public bool IsGameInitialize = false;
+    public bool IsTestMode = true;
 
     private void Awake() {
         
@@ -84,7 +85,7 @@ public class GameManager : MonoBehaviour
 
         EffectManager.GetInstance();
 
-        Time_LatestStartGame = DateTime.UtcNow;
+        //Time_LatestStartGame = DateTime.UtcNow;
 
         //Screen.SetResolution(720, 1280, true, 60);
     }
@@ -265,7 +266,6 @@ public class GameManager : MonoBehaviour
     const string rewardAdUnit_test = "ca-app-pub-3940256099942544/5224354917";
     const string rewardAdUnit_revive = "ca-app-pub-1021255306046408/1683457734";
 
-    bool isTestAd = true;
 
     string adUnitRewardId = string.Empty;
 
@@ -278,7 +278,7 @@ public class GameManager : MonoBehaviour
 
     void InitializeGoogleAds()
     {
-        if (isTestAd) adUnitRewardId = rewardAdUnit_test;
+        if (IsTestMode) adUnitRewardId = rewardAdUnit_test;
         else adUnitRewardId = rewardAdUnit_revive;
 
         MobileAds.Initialize(initStatus => {
@@ -372,7 +372,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Time_LatestStartGame = DateTime.UtcNow;
+            //Time_LatestStartGame = DateTime.UtcNow;
         }
     }
 

@@ -114,8 +114,12 @@ public class TopMostControl : MonoBehaviour
                 PlayerManager.Instance().playerController.isFainting = true;
             }
 
+            GameManager.Instance().Time_LatestStartGame = DateTime.UtcNow;
+
             // #### TEST
-            testscript.gameObject.SetActive(true);
+            if (GameManager.Instance().IsTestMode) testscript.gameObject.SetActive(true);
+            else testscript.gameObject.SetActive(false);
+
         }
         else
         {
@@ -142,7 +146,12 @@ public class TopMostControl : MonoBehaviour
         switch (targetScene.buildIndex)
         {
             case (int)SCENE_INDEX.MAINMENU:
-                SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["Opening"], 1.0f, 1.0f, true);
+                {
+                    if (PlayerManager.Instance().PlayMode == PLAY_MODE.NORMAL)
+                        SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["Opening"], 1.0f, 1.0f, true);
+                    else if (PlayerManager.Instance().PlayMode == PLAY_MODE.TRUE)
+                        SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Ending"], 1.0f, 1.0f, true);
+                }
                 break;
             case (int)SCENE_INDEX.GAMESTAGE:
                 if (StageLoader.CurrentStage == 1)
@@ -198,6 +207,8 @@ public class TopMostControl : MonoBehaviour
         blackPanelAlpha.value = blackPanelAlpha.startValue;
 
         StageLoader.NextStage = nextStageNum;
+
+        GameConfigs.SetPlayTime(TopMostControl.Instance().playUnixTime);
     }
 
     void SceneFadeoutFinishEvent()
@@ -565,8 +576,15 @@ public class TopMostControl : MonoBehaviour
     {
         if (GameManager.Instance().IsGameInitialize)
         {
-            TimeSpan diff = DateTime.UtcNow - GameManager.Instance().Time_LatestStartGame;
-            playUnixTime = GameConfigs.GetPlayUnixTime() + (int)diff.TotalSeconds;
+            if (SceneManager.GetActiveScene().buildIndex == (int)SCENE_INDEX.GAMESTAGE)
+            {
+                TimeSpan diff = DateTime.UtcNow - GameManager.Instance().Time_LatestStartGame;
+                playUnixTime = GameConfigs.GetPlayUnixTime() + (int)diff.TotalSeconds;
+            }
+            else
+            {
+                playUnixTime = GameConfigs.GetPlayUnixTime();
+            }
 
             TimeSpan curPlayTimeSpan = TimeSpan.FromSeconds(playUnixTime);
 

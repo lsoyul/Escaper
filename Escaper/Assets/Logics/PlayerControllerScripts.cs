@@ -127,6 +127,53 @@ public class PlayerControllerScripts : MonoBehaviour
         }
     }
     bool beforeGround;
+
+    private void FixedUpdate()
+    {
+
+        beforeGround = isGround;
+
+        isGround = CheckGround();
+
+        ControlGroundCollide();
+
+
+        // Grounded Just Timing Callback
+        if (beforeGround == false)
+        {
+            if (isGround == true)
+            {
+                if (isFalling)
+                {
+                    damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red);
+                    StartCoroutine(TriggerHurt(null, this.unbeatableDuration_hurt, false));
+                    PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
+                    isFainting = true;
+                    isFalling = false;
+                }
+
+                PlayerManager.Instance().OnGround();
+            }
+        }
+
+
+        if (playerRigidbody2D.velocity.y < minimumYSpeed)
+        {
+            // FAlling state
+            //Vector2 t = playerRigidbody2D.velocity;
+            //t.y = minimumYSpeed;
+            //playerRigidbody2D.velocity = t;
+
+            isFalling = true;
+        }
+
+
+        if (isFalling)
+        {
+            if (playerRigidbody2D.velocity.y >= 0) isFalling = false;
+        }
+    }
+
     private void Update()
     {
         Time.timeScale = timescale;
@@ -172,9 +219,20 @@ public class PlayerControllerScripts : MonoBehaviour
             //Eff_jumpCharge.SetActive(false);
         }
 
-
     }
 
+    private void LateUpdate()
+    {
+
+        var subSprites = Resources.LoadAll<Sprite>("Sprites/Hero/" + GameStatics.GetPlayerSpriteName(PlayerManager.Instance().CurrentPlayerSprite));
+
+        string oldSpriteName = playerRenderer.sprite.name;
+        var newSprite = Array.Find(subSprites, item => item.name == oldSpriteName);
+
+        if (newSprite) playerRenderer.sprite = newSprite;
+
+        UpdateAnimator();
+    }
 
 
     void OnPointerUp()
@@ -438,6 +496,9 @@ public class PlayerControllerScripts : MonoBehaviour
                                     GameConfigs.SetCurrentMemoryShards(PlayerManager.Instance().PlayerStatus.CurrentMemoryShards);
                                     TopMostControl.Instance().StartChangeScene(SCENE_INDEX.GAMESTAGE, true, StageLoader.CurrentStage + 1);
                                     trigger.TriggerOn = false;
+
+                                    if (StageLoader.CurrentStage == 1) Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_CLEAR_STAGE1);
+                                    else if (StageLoader.CurrentStage == 2) Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_CLEAR_STAGE2);
                                 }
                             }
                         }
@@ -625,7 +686,7 @@ public class PlayerControllerScripts : MonoBehaviour
 
             if (PlayerManager.Instance().CameraController() != null)
             {
-                PlayerManager.Instance().CameraController().CameraShake_Rot(5);
+                PlayerManager.Instance().CameraController().CameraShake_Rot(3);
             }
         }
     }
@@ -654,60 +715,6 @@ public class PlayerControllerScripts : MonoBehaviour
     public void BlinkPlayerShardLight(Color shardColor)
     {
         shardLight.StartBlink(0.5f, shardColor);
-    }
-
-    private void LateUpdate()
-    {
-        var subSprites = Resources.LoadAll<Sprite>("Sprites/Hero/" + GameStatics.GetPlayerSpriteName(PlayerManager.Instance().CurrentPlayerSprite));
-
-        string oldSpriteName = playerRenderer.sprite.name;
-        var newSprite = Array.Find(subSprites, item => item.name == oldSpriteName);
-
-        if (newSprite) playerRenderer.sprite = newSprite;
-
-
-        beforeGround = isGround;
-
-        isGround = CheckGround();
-
-        if (playerRigidbody2D.velocity.y < minimumYSpeed)
-        {
-            // FAlling state
-            Vector2 t = playerRigidbody2D.velocity;
-            t.y = minimumYSpeed;
-            playerRigidbody2D.velocity = t;
-
-            isFalling = true;
-        }
-
-
-        ControlGroundCollide();
-
-        UpdateAnimator();
-
-        // Grounded Just Timing Callback
-        if (beforeGround == false)
-        {
-            if (isGround == true)
-            {
-                if (isFalling)
-                {
-                    damagedLight.StartBlink(this.unbeatableDuration_hurt, Color.red); 
-                    StartCoroutine(TriggerHurt(null, this.unbeatableDuration_hurt, false));
-                    PlayerManager.Instance().OnDamaged(DAMAGED_TYPE.FALLING_GROUND);
-                    isFainting = true;
-                    isFalling = false;
-                }
-
-                PlayerManager.Instance().OnGround();
-            }
-        }
-
-        if (isFalling)
-        {
-            if (playerRigidbody2D.velocity.y >= 0) isFalling = false;
-        }
-
     }
 
     void OnChangePlayerSkin()

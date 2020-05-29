@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DigitalRuby.Tween;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
@@ -151,14 +152,14 @@ public class CameraControlScript : MonoBehaviour {
         {
             case DAMAGED_TYPE.FALLING_GROUND:
                 Vibration.Vibrate(5);
-                CameraShake_Rot(5);
+                CameraShake_Rot(3);
                 break;
             case DAMAGED_TYPE.EARTH_QUAKE:
                 // Already Shake at Trap pattern
                 break;
             default:
                 Vibration.Vibrate(3);
-                CameraShake_Rot(2);
+                CameraShake_Rot(1);
                 break;
         }
     }
@@ -183,20 +184,18 @@ public class CameraControlScript : MonoBehaviour {
         {
             currentCount++;
 
-            tweener.startingVector = new Vector3(0, 0, -1);
-            tweener.endVector = new Vector3(0, 0, 1);
+            //tweener.startingVector = new Vector3(0, 0, -1);
+            tweener.endVector = new Vector3(0, 0, 3);
             tweener.Begin();
-            tweener.vector3Results = Vector3.zero;
+            tweener.vector3Results = tweener.startingVector;
             yield return new WaitForSecondsRealtime(tweener.duration);
         }
 
         // End Shake
-
         tweener.endVector = Vector3.zero;
         tweener.Stop();
+
         IsShakingCamera = false;
-        //tweener.vector3Results = Vector3.zero;
-        //tweener.transform.rotation = Vector3.zero;
     }
 
     //public void CameraShake(int count)

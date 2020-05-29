@@ -199,14 +199,17 @@ public class GameConfigs
             case GameStatics.PORTAL_TYPE.STAGE1_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage1_1, isOnInt);
                 portal_stage1_1 = isOnInt;
+                if (isOn) Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_OPEN_PORTAL_STAGE1);
                 break;
             case GameStatics.PORTAL_TYPE.STAGE2_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage2_1, isOnInt);
                 portal_stage2_1 = isOnInt;
+                if (isOn) Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_OPEN_PORTAL_STAGE2);
                 break;
             case GameStatics.PORTAL_TYPE.STAGE3_1:
                 PlayerPrefs.SetInt(GameStatics.PREFS_PORTAL_Stage3_1, isOnInt);
                 portal_stage3_1 = isOnInt;
+                if (isOn) Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_OPEN_PORTAL_STAGE3);
                 break;
             default:
                 break;

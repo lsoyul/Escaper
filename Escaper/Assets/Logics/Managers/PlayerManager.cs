@@ -250,12 +250,14 @@ public class PlayerManager : MonoBehaviour
 
                     if (cameraController != null)
                     {
-                        cameraController.CameraShake_Rot(5);
+                        cameraController.CameraShake_Rot(3);
                     }
 
                     EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
                     TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
                     SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
+
+                    Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_REVIVE_SHARD);
                 }
                 break;
             case MENU_GAMEOVER.REVIVE_AD:
@@ -281,12 +283,14 @@ public class PlayerManager : MonoBehaviour
 
             if (cameraController != null)
             {
-                cameraController.CameraShake_Rot(5);
+                cameraController.CameraShake_Rot(3);
             }
 
             EffectManager.GetInstance().playEffect(playerController.GetPlayerRigidBody().transform.position, EFFECT.YELLOW_PILLAR, Vector2.zero);
             TopMostControl.Instance().StartBGM(SceneManager.GetActiveScene());
             SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_revive].clip);
+
+            Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_REVIVE_ADS);
         }
     }
 
@@ -406,10 +410,12 @@ public class PlayerManager : MonoBehaviour
                 if (PlayMode == PLAY_MODE.NORMAL)
                 {
                     GameConfigs.SetNormalEnding();
+                    Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_TRIGGER_ENDING_NORMAL);
                 }
                 else if (PlayMode == PLAY_MODE.TRUE)
                 {
                     GameConfigs.SetTrueEnding();
+                    Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_TRIGGER_ENDING_TRUEHERO);
                 }
 
                 StartCoroutine(ShowEnding());

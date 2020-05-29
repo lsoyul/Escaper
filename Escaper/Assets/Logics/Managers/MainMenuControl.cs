@@ -49,6 +49,8 @@ public class MainMenuControl : MonoBehaviour
 
     public Text ChangeModeText;
 
+    public TweenTransforms ChangeModeCameraTween;
+
     [Header("- DebugTest -")]
     public UnityEngine.UI.Text debugText;
 
@@ -291,6 +293,11 @@ public class MainMenuControl : MonoBehaviour
         {
             TopMostControl.Instance().StartChangeScene(SCENE_INDEX.CUTSCENE, true);
             SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
+
+            if (PlayerManager.Instance().PlayMode == PLAY_MODE.NORMAL)
+                Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_START_GAME_NORMAL);
+            else if (PlayerManager.Instance().PlayMode == PLAY_MODE.TRUE)
+                Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_START_GAME_TRUEHERO);
         }
     }
 
@@ -302,6 +309,8 @@ public class MainMenuControl : MonoBehaviour
             GameConfigs.SetLastPlayMode(PLAY_MODE.TRUE);
             Show_NormalObject.SetActive(false);
             Show_Ending1Object.SetActive(true);
+
+            SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["BGM_Ending"], 1.0f, 1.0f, true);
         }
         else
         {
@@ -309,9 +318,15 @@ public class MainMenuControl : MonoBehaviour
             GameConfigs.SetLastPlayMode(PLAY_MODE.NORMAL);
             Show_NormalObject.SetActive(true);
             Show_Ending1Object.SetActive(false);
+
+            SoundManager.PlayLoopingMusic(SoundContainer.Instance().BackGroundMusicsDic["Opening"], 1.0f, 1.0f, true);
         }
 
         SetChangeModeText(PlayerManager.Instance().PlayMode);
+        ChangeModeCameraTween.Begin();
+        ChangeModeCameraTween.vector3Results = ChangeModeCameraTween.startingVector;
+
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_explosion1].clip);
     }
 
     void SetChangeModeText(PLAY_MODE playMode)

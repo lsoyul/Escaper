@@ -320,11 +320,17 @@ public static class GameStatics
 
     #region #### Log Events ####
 
-    public const string EVENT_START_GAME = "E_StartGame";
-
-    public const string EVENT_LOGIN_ANONYMOUS = "E_Signin_Anony";
-    public const string EVENT_LOGIN_GOOGLE = "E_Login_Google";
-    public const string EVENT_LOGOUT = "E_Logout";
+    public const string EVENT_START_GAME_NORMAL = "E_StartGame_Normal";
+    public const string EVENT_START_GAME_TRUEHERO = "E_StartGame_TrueHero";
+    public const string EVENT_CLEAR_STAGE1 = "E_Clear_Stage1";
+    public const string EVENT_CLEAR_STAGE2 = "E_Clear_Stage2";
+    public const string EVENT_TRIGGER_ENDING_NORMAL = "E_Trigger_Ending_Normal";
+    public const string EVENT_TRIGGER_ENDING_TRUEHERO = "E_Trigger_Ending_TrueHero";
+    public const string EVENT_OPEN_PORTAL_STAGE1 = "E_Open_Portal_Stage1";
+    public const string EVENT_OPEN_PORTAL_STAGE2 = "E_Open_Portal_Stage2";
+    public const string EVENT_OPEN_PORTAL_STAGE3 = "E_Open_Portal_Stage3";
+    public const string EVENT_REVIVE_SHARD = "E_Revive_Shard";
+    public const string EVENT_REVIVE_ADS = "E_Revive_Ads";
 
     #endregion
 
