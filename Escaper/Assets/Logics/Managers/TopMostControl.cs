@@ -9,6 +9,7 @@ using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
 using UnityEngine.UI;
 using System;
+using System.Security.Policy;
 
 public class TopMostControl : MonoBehaviour
 {
@@ -675,6 +676,19 @@ public class TopMostControl : MonoBehaviour
     public int playUnixTime;
     public Text playTimeText;
 
+    public GameObject creditViewObj;
+    public ScrollRect creditScrollRect;
+
+    public void OnClickCreditButton()
+    {
+        creditViewObj.SetActive(true);
+    }
+
+    public void OnClickCloseCreditView()
+    {
+        creditViewObj.SetActive(false);
+    }
+
     public void OnChangeVibrateToggle()
     {
         GameConfigs.SetIsVibrate(toggle_vibrate.isOn);
@@ -778,6 +792,7 @@ public class TopMostControl : MonoBehaviour
     public PopupSingle PopupSingle;
 
     #endregion
+
 
     [Header("- TEST -")]
     public TestScript testscript;
