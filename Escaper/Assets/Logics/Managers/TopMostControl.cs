@@ -118,8 +118,8 @@ public class TopMostControl : MonoBehaviour
             GameManager.Instance().Time_LatestStartGame = DateTime.UtcNow;
 
             // #### TEST
-            if (GameManager.Instance().IsTestMode) testscript.gameObject.SetActive(true);
-            else testscript.gameObject.SetActive(false);
+            if (GameManager.Instance().IsTestMode) testButton.gameObject.SetActive(true);
+            else testButton.gameObject.SetActive(false);
 
         }
         else
@@ -131,7 +131,7 @@ public class TopMostControl : MonoBehaviour
             ReturnButton.SetActive(false);
             SettingShowButton.SetActive(false);
 
-            testscript.gameObject.SetActive(false);
+            testButton.gameObject.SetActive(false);
         }
 
         PlayerManager.Instance().IsTriggerEnding = false;
@@ -795,5 +795,12 @@ public class TopMostControl : MonoBehaviour
 
 
     [Header("- TEST -")]
+    public GameObject testButton;
     public TestScript testscript;
+
+    public void OnClickTestButton()
+    {
+        if (testscript.gameObject.activeInHierarchy == false) testscript.gameObject.SetActive(true);
+        else testscript.gameObject.SetActive(false);
+    }
 }

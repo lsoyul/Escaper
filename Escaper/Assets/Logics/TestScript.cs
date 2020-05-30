@@ -60,4 +60,5 @@ public class TestScript : MonoBehaviour
     {
         PlayerManager.Instance().TEST_SetRandomSkin();
     }
+
 }

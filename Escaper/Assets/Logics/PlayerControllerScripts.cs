@@ -131,11 +131,23 @@ public class PlayerControllerScripts : MonoBehaviour
     private void FixedUpdate()
     {
 
+
         beforeGround = isGround;
 
         isGround = CheckGround();
 
+        if (playerRigidbody2D.velocity.y < minimumYSpeed)
+        {
+            // FAlling state
+            //Vector2 t = playerRigidbody2D.velocity;
+            //t.y = minimumYSpeed;
+            //playerRigidbody2D.velocity = t;
+
+            isFalling = true;
+        }
+
         ControlGroundCollide();
+
 
 
         // Grounded Just Timing Callback
@@ -156,22 +168,11 @@ public class PlayerControllerScripts : MonoBehaviour
             }
         }
 
-
-        if (playerRigidbody2D.velocity.y < minimumYSpeed)
-        {
-            // FAlling state
-            //Vector2 t = playerRigidbody2D.velocity;
-            //t.y = minimumYSpeed;
-            //playerRigidbody2D.velocity = t;
-
-            isFalling = true;
-        }
-
-
         if (isFalling)
         {
             if (playerRigidbody2D.velocity.y >= 0) isFalling = false;
         }
+
     }
 
     private void Update()

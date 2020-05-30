@@ -380,4 +380,5 @@ public class GameManager : MonoBehaviour
     {
         GameConfigs.SetPlayTime(TopMostControl.Instance().playUnixTime);
     }
+
 }
