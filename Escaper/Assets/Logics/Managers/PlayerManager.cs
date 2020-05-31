@@ -411,6 +411,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     GameConfigs.SetNormalEnding();
                     Firebase.Analytics.FirebaseAnalytics.LogEvent(GameStatics.EVENT_TRIGGER_ENDING_NORMAL);
+                    PlayMode = PLAY_MODE.TRUE;
                 }
                 else if (PlayMode == PLAY_MODE.TRUE)
                 {

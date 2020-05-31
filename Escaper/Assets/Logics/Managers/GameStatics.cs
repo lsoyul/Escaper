@@ -11,7 +11,7 @@ public static class GameStatics
 
     public const int default_IncHP = 5;
     public const double default_IncAirTimeDuration = 0.1f;
-    public const double default_IncShardsPullDistance = 1f;
+    public const double default_IncShardsPullDistance = 2f;
     public const int default_BaseMaxHP = 40;
     public const double default_AirTimeDuration = 1f;
     public const double default_ShardsPullDistance = 10.0f;
@@ -147,7 +147,7 @@ public static class GameStatics
                 result = (GameConfigs.SkillLevel(skillType) + 1) * default_IncHPShards;
                 break;
             case SKILL_TYPE.AIRTIME_DURATION:
-                const int default_IncCoolShards = 50;
+                const int default_IncCoolShards = 30;
                 result = (GameConfigs.SkillLevel(skillType) + 1) * default_IncCoolShards;
                 break;
             case SKILL_TYPE.SHARD_PULL_DIST:
@@ -194,15 +194,15 @@ public static class GameStatics
     #region #### Damage Points ####
 
     private static int DAMAGE_BASIC_SPIKE = 10;
-    private static int DAMAGE_PROJECTILE1 = 20;
-    private static int DAMAGE_PROJECTIlE2 = 30;
+    private static int DAMAGE_PROJECTILE1 = 15;
+    private static int DAMAGE_PROJECTIlE2 = 20;
 
     public static int GetDamagePoints(DAMAGED_TYPE damageType)
     {
         switch (damageType)
         {
             case DAMAGED_TYPE.SPIKE:
-                return DAMAGE_BASIC_SPIKE * StageLoader.CurrentStage;
+                return DAMAGE_BASIC_SPIKE;
             case DAMAGED_TYPE.PROJECTILE_SHOOTER1:
                 return DAMAGE_PROJECTILE1;
             case DAMAGED_TYPE.PROJECTILE_SHOOTER2:

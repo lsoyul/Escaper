@@ -14,8 +14,8 @@ public class GameConfigs
     private static int currentMemoryShards = 0;
 
     private const int maxSkillLevel_MaxHP = 999;
-    private const int maxSkillLevel_AirTimeDuration = 25;
-    private const int maxSkillLevel_ShardPullDistance = 30;
+    private const int maxSkillLevel_AirTimeDuration = 50;
+    private const int maxSkillLevel_ShardPullDistance = 15;
 
     private static int portal_stage1_1 = 0;
     private static int portal_stage2_1 = 0;
