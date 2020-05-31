@@ -4,11 +4,9 @@ using UnityEngine;
 
 using System;
 
-// Use Google Play Services
-//using GooglePlayGames;
-//using GooglePlayGames.BasicApi;
 using GoogleMobileAds.Api;
-using DigitalRuby.SoundManagerNamespace;
+
+using CodeStage.AntiCheat.ObscuredTypes;
 
 public class GameManager : MonoBehaviour
 {
@@ -45,8 +43,8 @@ public class GameManager : MonoBehaviour
     #endregion
 
 
-    public bool IsGameInitialize = false;
-    public bool IsTestMode = true;
+    public ObscuredBool IsGameInitialize = false;
+    public ObscuredBool IsTestMode = true;
 
     private void Awake() {
         

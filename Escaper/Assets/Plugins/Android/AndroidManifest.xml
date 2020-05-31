@@ -13,4 +13,8 @@
     </activity>
     <service android:name="com.google.firebase.messaging.MessageForwardingService" android:exported="false" />
   </application>
+
+  <uses-permission android:name="android.permission.VIBRATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+
 </manifest>
