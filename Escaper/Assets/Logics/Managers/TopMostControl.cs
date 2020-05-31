@@ -796,6 +796,12 @@ public class TopMostControl : MonoBehaviour
 
     #endregion
 
+    #region #### Tutorial ####
+
+    public bool startShowTutorialPopup1 = false;
+    public bool startShowTutorialPopup2 = false;
+
+    #endregion
 
     [Header("- TEST -")]
     public GameObject testButton;

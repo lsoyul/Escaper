@@ -32,6 +32,8 @@ public class GameConfigs
     private static ObscuredInt ending_true = 0;
 
     private static ObscuredInt last_playmode = 0;
+
+    private static ObscuredInt WatchedTutorial = 0;
     #endregion
 
     #region ### GETTER ###
@@ -129,6 +131,7 @@ public class GameConfigs
         ending_normal = 0;
         ending_true = 0;
         last_playmode = 0;
+        WatchedTutorial = 0;
 
         ObscuredPrefs.SetInt(GameStatics.PREFS_MaxProgressStage, maxProgressStage);
         ObscuredPrefs.SetInt(GameStatics.PREFS_SkillLevel_MaxHP, skillLevel_MaxHP);
@@ -154,6 +157,8 @@ public class GameConfigs
         ObscuredPrefs.SetInt(GameStatics.PREFS_ENDING_TRUE, 0);
 
         ObscuredPrefs.SetInt(GameStatics.PREFS_LAST_PLAYMODE, 0);
+
+        ObscuredPrefs.SetInt(GameStatics.PREFS_WATCHED_TUTORIAL, 0);
     }
 
     public static void SetMaxProgressStage(int maxStage)
@@ -301,5 +306,18 @@ public class GameConfigs
             default:
                 return GameStatics.PLAY_MODE.NORMAL;
         }
+    }
+
+    public static bool GetWatchedTutorial()
+    {
+        int watchedTutorialInt = ObscuredPrefs.GetInt(GameStatics.PREFS_WATCHED_TUTORIAL, 0);
+
+        return (watchedTutorialInt == 1) ? true : false;
+    }
+
+    public static void SetWatchedTutorial(bool watched)
+    {
+        int watchTutorial = (watched) ? 1 : 0;
+        ObscuredPrefs.SetInt(GameStatics.PREFS_WATCHED_TUTORIAL, watchTutorial);
     }
 }

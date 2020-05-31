@@ -359,5 +359,6 @@ public static class GameStatics
     public const string PREFS_ENDING_TRUE = "PREFS_ENDING_TRUE";
 
     public const string PREFS_LAST_PLAYMODE = "PREFS_LAST_PLAYMODE";
+    public const string PREFS_WATCHED_TUTORIAL = "PREFS_WATCHED_TUTORIAL";
     #endregion
 }
