@@ -4,11 +4,9 @@ using UnityEngine;
 
 using System;
 
-// Use Google Play Services
-//using GooglePlayGames;
-//using GooglePlayGames.BasicApi;
 using GoogleMobileAds.Api;
-using DigitalRuby.SoundManagerNamespace;
+
+using CodeStage.AntiCheat.ObscuredTypes;
 
 public class GameManager : MonoBehaviour
 {
@@ -45,8 +43,8 @@ public class GameManager : MonoBehaviour
     #endregion
 
 
-    public bool IsGameInitialize = false;
-    public bool IsTestMode = true;
+    public ObscuredBool IsGameInitialize = false;
+    public ObscuredBool IsTestMode = true;
 
     private void Awake() {
         
@@ -245,6 +243,10 @@ public class GameManager : MonoBehaviour
 
                 // Set a flag here to indicate whether Firebase is ready to use by your app.
                 Firebase.Analytics.FirebaseAnalytics.SetAnalyticsCollectionEnabled(true);
+
+
+                Firebase.Messaging.FirebaseMessaging.TokenReceived += OnTokenReceived;
+                Firebase.Messaging.FirebaseMessaging.MessageReceived += OnMessageReceived;
             }
             else
             {
@@ -254,7 +256,19 @@ public class GameManager : MonoBehaviour
                 Firebase.Analytics.FirebaseAnalytics.SetAnalyticsCollectionEnabled(false);
             }
         });
+
     }
+
+    public void OnTokenReceived(object sender, Firebase.Messaging.TokenReceivedEventArgs token)
+    {
+        UnityEngine.Debug.Log("Received Registration Token: " + token.Token);
+    }
+
+    public void OnMessageReceived(object sender, Firebase.Messaging.MessageReceivedEventArgs e)
+    {
+        UnityEngine.Debug.Log("Received a new message from: " + e.Message.From);
+    }
+
     #region #### Play Time ####
 
     public DateTime Time_LatestStartGame = new DateTime();

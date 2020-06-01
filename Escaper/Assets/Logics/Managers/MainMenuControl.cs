@@ -40,6 +40,8 @@ public class MainMenuControl : MonoBehaviour
 
     public TweenTransforms Btn_Newgame;
     public TweenTransforms Btn_ChangeMode;
+    public Text Btn_NewGameText;
+    public Button NewGameButton;
 
     bool isEndAnimating = false;
 
@@ -336,10 +338,14 @@ public class MainMenuControl : MonoBehaviour
             case PLAY_MODE.NORMAL:
                 ChangeModeText.text = "NORMAL";
                 ChangeModeText.color = Color.green;
+                Btn_NewGameText.color = Color.white;
+                NewGameButton.interactable = true;
                 break;
             case PLAY_MODE.TRUE:
                 ChangeModeText.text = "TRUE HERO";
                 ChangeModeText.color = Color.cyan;
+                Btn_NewGameText.color = Color.gray;
+                NewGameButton.interactable = false;
                 break;
             default:
                 ChangeModeText.text = "NORMAL";

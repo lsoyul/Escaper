@@ -9,7 +9,6 @@ using DigitalRuby.SoundManagerNamespace;
 using static GameStatics;
 using UnityEngine.UI;
 using System;
-using System.Security.Policy;
 
 public class TopMostControl : MonoBehaviour
 {
@@ -681,16 +680,19 @@ public class TopMostControl : MonoBehaviour
 
     public void OnClickCreditButton()
     {
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
         creditViewObj.SetActive(true);
     }
 
     public void OnClickCloseCreditView()
     {
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
         creditViewObj.SetActive(false);
     }
 
     public void OnChangeVibrateToggle()
     {
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
         GameConfigs.SetIsVibrate(toggle_vibrate.isOn);
     }
 
@@ -747,6 +749,7 @@ public class TopMostControl : MonoBehaviour
 
     public void OnClickSettingHide()
     {
+        SoundManager.PlayOneShotSound(SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select], SoundContainer.Instance().SoundEffectsDic[GameStatics.sound_select].clip);
         IsSettingState = false;
         SettingControlTweenTrans.startingVector = inXPos_SettingControl;
         SettingControlTweenTrans.endVector = outXPos_SettingControl;
@@ -793,6 +796,12 @@ public class TopMostControl : MonoBehaviour
 
     #endregion
 
+    #region #### Tutorial ####
+
+    public bool startShowTutorialPopup1 = false;
+    public bool startShowTutorialPopup2 = false;
+
+    #endregion
 
     [Header("- TEST -")]
     public GameObject testButton;

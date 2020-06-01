@@ -124,6 +124,39 @@ public class CameraControlScript : MonoBehaviour {
             }
         }
 
+        // Stage 1 Tutorial
+        if (GameConfigs.GetWatchedTutorial() == false)
+        {
+            if (StageLoader.CurrentStage == 1)
+            {
+                if (player.isFainting == false && player.IsGround() && TopMostControl.Instance().startShowTutorialPopup1 == false)
+                {
+                    TopMostControl.Instance().startShowTutorialPopup1 = true;
+                    TopMostControl.Instance().PopupSingle.ShowPopup(
+                        "<color=cyan>JUMP</color>", 
+                        "<color=yellow>Draw Finger</color> to decide the direction\n\n" +
+                        "<color=yellow>Release</color> to Jump");
+                }
+
+                if (player.transform.position.x > 30 && TopMostControl.Instance().startShowTutorialPopup2 == false)
+                {
+                    TopMostControl.Instance().startShowTutorialPopup2 = true;
+                    TopMostControl.Instance().PopupSingle.ShowPopup(
+                        "<color=cyan>AIR TIME</color>",
+                        "<color=yellow>Hold Touch</color> to slow time in the Air", () => {
+
+                            TopMostControl.Instance().PopupSingle.ShowPopup(
+                            "<color=cyan>DOUBLE JUMP</color>",
+                            "<color=yellow>JUMP</color> in the Air time", () => {
+
+                                GameConfigs.SetWatchedTutorial(true);
+                            });
+
+                        });
+                }
+            }
+        }
+
         // Check Upgrade Status
         if (TopMostControl.Instance().GetGameUIStatus() == TOPUI_STATUS.GAMEOVER)
         {
