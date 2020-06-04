@@ -254,11 +254,11 @@ public static class GameStatics
         switch (portalType)
         {
             case PORTAL_TYPE.STAGE1_1:
-                return 1500;
+                return 1000;
             case PORTAL_TYPE.STAGE2_1:
-                return 2500;
+                return 2000;
             case PORTAL_TYPE.STAGE3_1:
-                return 3500;
+                return 3000;
             default:
                 return 0;
         }
